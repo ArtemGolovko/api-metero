@@ -1,0 +1,45 @@
+{
+  "name": "api-metero",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && cp src/.env dist",
+    "serve": "ts-node src/server.ts",
+    "start": "nodemon --legacy-watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/co-body": "^6.1.0",
+    "@types/koa": "^2.13.4",
+    "@types/koa-logger": "^3.1.2",
+    "@types/koa-router": "^7.4.4",
+    "@types/node": "^17.0.25",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.7.0",
+    "tslib": "^2.3.1",
+    "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "@mikro-orm/cli": "^5.1.2",
+    "@mikro-orm/core": "^5.1.2",
+    "@mikro-orm/knex": "^5.1.2",
+    "@mikro-orm/migrations": "^5.1.2",
+    "@mikro-orm/mysql": "^5.1.2",
+    "co-body": "^6.1.0",
+    "dotenv": "^16.0.0",
+    "koa": "^2.13.4",
+    "koa-logger": "^3.2.1",
+    "koa-router": "^10.1.1"
+  },
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./src/mikro-orm.config.ts",
+      "./dist/mikro-orm.config.js"
+    ]
+  }
+}
