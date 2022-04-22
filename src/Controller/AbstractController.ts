@@ -1,6 +1,7 @@
 import { Context, Middleware, Next } from "koa";
 import Router from "koa-router";
 import parser from "co-body";
+import handleException from "../Exception/HandleException";
 
 export default abstract class AbstractController {
 
@@ -14,8 +15,10 @@ export default abstract class AbstractController {
             try {
                 await middleware.call(this, ctx);
             } catch(error) {
-                ctx.status = 500;
-                console.error(error);
+                const { status, body, headers } = handleException(error);
+                ctx.status = status;
+                ctx.body = body;
+                if (headers !== null) ctx.set(headers);
             }
             await next();
         }).bind(this);
