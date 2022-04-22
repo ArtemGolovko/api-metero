@@ -2,3 +2,5 @@ start.sh
 node_modules
 dist
 src/.env
+log/*
+!log/.gitkeep

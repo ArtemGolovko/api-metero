@@ -1,6 +1,7 @@
 import type { Options } from "@mikro-orm/core";
 import { config } from 'dotenv';
 import { User } from "./Entity/User";
+import { databaseLogger } from "./logger";
 
 config({
     path: __dirname + "/.env"
@@ -19,5 +20,7 @@ export default {
         tableName: 'migrations',
         pathTs: 'src/Migrations',
         path: 'dist/Migrations'
-    }
+    },
+    debug: true,
+    logger: (message) => databaseLogger.info(message)
 } as Options;
