@@ -1,9 +1,10 @@
-import Koa from 'koa';
+import Koa, { Context, Next } from 'koa';
 import logger from 'koa-logger';
 import { EntityManager, MikroORM, RequestContext } from '@mikro-orm/core';
 
 import Router from './Controller/Router';
 import { defaultLogger, httpLogger } from './logger';
+import handler from './Exception/HandleKoaErrors';
 
 console.time("Bootstrap");
 
@@ -29,6 +30,7 @@ const port = process.env.PORT || 3000;
     app.use(logger({
       transporter: (str: string, args: TKoaLoggerArgs) => httpLogger.http(str, args)
     }));
+    app.use(handler);
     app.use(Router.routes());
     app.use(Router.allowedMethods());
   

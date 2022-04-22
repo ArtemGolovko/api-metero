@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc && cp src/.env dist",
     "serve": "ts-node src/server.ts",
-    "start": "nodemon --legacy-watch",
+    "start": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
