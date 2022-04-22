@@ -13,8 +13,6 @@ const handler = async (ctx: Context, next: Next) => {
 
     let exception: AbstractException;
 
-    console.log(ctx.status, typeof ctx.status);
-
     switch(ctx.status) {
         case 404:
             exception = new NotFound({ code: CODES.PageNotFound });
