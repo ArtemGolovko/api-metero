@@ -23,7 +23,7 @@ const handler = async (ctx: Context, next: Next) => {
                 allow: ctx.response.header['allow']?.toString().split(', ') ?? [] 
             });
             break;
-        default: exception = new InternalServerError();
+        default: return;
     }
 
     const { status, body, headers } = handleException(exception);
