@@ -1,6 +1,10 @@
 import type { Options } from "@mikro-orm/core";
 import { config } from 'dotenv';
-import { User } from "./Entity/User";
+import Comment from "./Entity/Comment";
+import Hashtag from "./Entity/Hashtag";
+import Post from "./Entity/Post";
+import Reply from "./Entity/Reply";
+import User from "./Entity/User";
 import { databaseLogger } from "./logger";
 
 config({
@@ -9,7 +13,7 @@ config({
 
 
 export default {
-    entities: [User],
+    entities: [User, Post, Comment, Reply, Hashtag],
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     dbName: process.env.DB_NAME,
