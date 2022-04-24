@@ -4,3 +4,4 @@ dist
 src/.env
 log/*
 !log/.gitkeep
+src/Migrations/.snapshot-api-metero.json
