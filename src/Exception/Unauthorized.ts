@@ -1,13 +1,13 @@
 import AbstractException from "./AbstractException";
 import type { TBody, THeaders } from "./AbstractException";
 
-export const enum CODES {
+export const enum CODE {
     NoAuthorization = 0,
     NotFound = 1
 }
 
 type TConext = {
-    code: CODES
+    code: CODE
 }
 
 export default class Unauthorized extends AbstractException {
@@ -19,15 +19,15 @@ export default class Unauthorized extends AbstractException {
 
     private getMessage() {
         switch (this.context.code) { 
-            case CODES.NoAuthorization: return 'No authorization found';
-            case CODES.NotFound: return 'No user found';
+            case CODE.NoAuthorization: return 'No authorization found';
+            case CODE.NotFound: return 'No user found';
         }
     }
 
     private getHint() {
         switch (this.context.code) {
-            case CODES.NoAuthorization: return 'Add Authorization header with value: \'Bearer {username}\'';
-            case CODES.NotFound: return 'Check if user with this username exists';
+            case CODE.NoAuthorization: return 'Add Authorization header with value: \'Bearer {username}\'';
+            case CODE.NotFound: return 'Check if user with this username exists';
         }
     }
 
@@ -46,10 +46,10 @@ export default class Unauthorized extends AbstractException {
     public headers(): THeaders | null {
         let error: string;
         switch(this.context.code) {
-            case CODES.NoAuthorization:
+            case CODE.NoAuthorization:
                 error = 'invalid_request';
                 break;
-            case CODES.NotFound:
+            case CODE.NotFound:
                 error = 'invalid_token';
                 break;
         }

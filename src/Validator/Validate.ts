@@ -1,10 +1,10 @@
 import Joi from "joi";
-import { BadRequest, CODES } from "../Exception/BadRequest";
+import { BadRequest, CODE } from "../Exception/BadRequest";
 
 const validate = (schema: Joi.Schema, body: any) => {
     const { value, error } = schema.validate(body);
     if (error !== undefined) throw new BadRequest({
-        code: CODES.Validation,
+        code: CODE.Validation,
         message: error.message
     });
 

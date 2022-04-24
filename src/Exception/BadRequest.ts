@@ -1,13 +1,13 @@
 import AbstractException from "./AbstractException";
 import type { TBody } from "./AbstractException";
 
-export const enum CODES {
+export const enum CODE {
     Validation = 0,
     NotFound = 1
 }
 
 type TContext = {
-    code: CODES,
+    code: CODE,
     message?: string
 }
 
@@ -20,17 +20,17 @@ export class BadRequest extends AbstractException {
 
     private getMessage() {
         switch (this.context.code) {
-            case CODES.Validation:
+            case CODE.Validation:
                 const ending = this.context.message ?? `. ${this.context.message}`;
                 return 'Validation error occured' + ending;
-            case CODES.NotFound: return 'Resource not found';
+            case CODE.NotFound: return 'Resource not found';
         }
     }
 
     private getHint() {
         switch (this.context.code) {
-            case CODES.Validation: return 'to do';
-            case CODES.NotFound: return 'to do';
+            case CODE.Validation: return 'to do';
+            case CODE.NotFound: return 'to do';
         }
     }
 

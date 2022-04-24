@@ -1,13 +1,13 @@
 import AbstractException from "./AbstractException";
 import type { TBody } from "./AbstractException";
 
-export const enum CODES {
+export const enum CODE {
     PageNotFound = 0,
     RosourceNotFound = 1
 }
 
 type TContext = {
-    code: CODES,
+    code: CODE,
     resoure?: string,
     id?: string|number
 }
@@ -20,7 +20,7 @@ export default class NotFound extends AbstractException {
     }
 
     private getMessage() {
-        if (this.context.code === CODES.PageNotFound) return 'Page not found';
+        if (this.context.code === CODE.PageNotFound) return 'Page not found';
 
         if (this.context.resoure === undefined || this.context.id === undefined)
             return 'Not Found: Resource not found';
@@ -29,7 +29,7 @@ export default class NotFound extends AbstractException {
     }
 
     private getHint() {
-        if (this.context.code === CODES.PageNotFound) return 'No hint this time';
+        if (this.context.code === CODE.PageNotFound) return 'No hint this time';
 
         return 'Check if identifier is valid and resource with this identifier exists';
     }

@@ -3,7 +3,7 @@ import AbstractException from "./AbstractException";
 import handleException from "./HandleException";
 import InternalServerError from "./InternalServerError";
 import MethodNotAllowed from "./MethodNotAllowed";
-import NotFound, { CODES } from "./NotFound";
+import NotFound, { CODE } from "./NotFound";
 
 const handler = async (ctx: Context, next: Next) => {
     await next();
@@ -15,7 +15,7 @@ const handler = async (ctx: Context, next: Next) => {
 
     switch(ctx.status) {
         case 404:
-            exception = new NotFound({ code: CODES.PageNotFound });
+            exception = new NotFound({ code: CODE.PageNotFound });
             break;
         case 405:
             exception = new MethodNotAllowed({
