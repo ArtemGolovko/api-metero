@@ -6,6 +6,9 @@ import Router from './Controller/Router';
 import { defaultLogger, httpLogger } from './logger';
 import handler from './Exception/HandleKoaErrors';
 
+import UserRepository from './Repository/UserRepository';
+import User from './Entity/User';
+
 console.time("Bootstrap");
 
 type TKoaLoggerArgs = [string, string, string, number | undefined, string | undefined, string | undefined];
@@ -15,6 +18,7 @@ export const DI = {
 } as {
   orm: MikroORM,
   em: EntityManager,
+  userRepository: UserRepository,
   logger: typeof defaultLogger
 };
 
@@ -25,6 +29,7 @@ const port = process.env.PORT || 3000;
 (async () => {
     DI.orm = await MikroORM.init();
     DI.em = DI.orm.em;
+    DI.userRepository = DI.em.getRepository(User);
   
     app.use((ctx, next) => RequestContext.createAsync(DI.orm.em, next));
     app.use(logger({
@@ -35,7 +40,7 @@ const port = process.env.PORT || 3000;
     app.use(Router.allowedMethods());
   
     app.listen(port, () => {
-      console.log(`MikroORM Koa TS test started at http://localhost:${port}`);
+      console.log(`MikroORM Koa TS API started at http://localhost:${port}`);
       console.timeEnd("Bootstrap");
     });
 })();

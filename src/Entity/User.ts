@@ -1,10 +1,13 @@
-import { Collection, Entity, ManyToMany, OneToMany, PrimaryKey, Property, types } from "@mikro-orm/core"
+import { Collection, Entity, EntityRepositoryType, ManyToMany, OneToMany, PrimaryKey, Property, types } from "@mikro-orm/core"
+import UserRepository from "../Repository/UserRepository"
 import Comment from "./Comment"
 import Post from "./Post"
 import Reply from "./Reply"
 
-@Entity()
+@Entity({ customRepository: () => UserRepository })
 export default class User {
+    [EntityRepositoryType]?: UserRepository
+
     @PrimaryKey({ type: types.string, autoincrement: false })
     username!: string
 
@@ -17,8 +20,8 @@ export default class User {
     @Property({ type: types.string })
     profileBanner!: string
 
-    @Property({ type: types.boolean })
-    isPrivate: boolean = false
+    @Property({ type: types.boolean, default: false })
+    isPrivate!: boolean
 
     @ManyToMany(() => User, 'subscribed', { owner: true })
     subscribers = new Collection<User>(this);
@@ -49,4 +52,10 @@ export default class User {
 
     @ManyToMany(() => Reply, reply => reply.likes)
     repiesLiked = new Collection<Reply>(this);
+
+    @Property({ persist: false })
+    subscribersCount?: number
+
+    @Property({ persist: false })
+    subscribedCount?: number
 }

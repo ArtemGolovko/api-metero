@@ -1,29 +1,49 @@
 import { Context } from "koa";
 import Router from "koa-router";
-import { User } from "../Entity/User";
+import User from "../Entity/User";
 import { DI } from "../server";
+import { createSchema } from "../Validator/Schema/UserSchema";
+import type { TCreate } from "../Validator/Schema/UserSchema";
+import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
 
+export const format = (user: User) => ({
+    username: user.username,
+    name: user.name,
+    avatar: user.avatar,
+    profileBanner: user.profileBanner,
+    isPrivate: user.isPrivate,
+    subscribers: user.subscribersCount,
+    subs: user.subscribedCount
+});
+
 export default class UserController extends AbstractController {
-    // private async createUser(ctx: Context) {
-    //     const body = await this.json();
-    //     const user = DI.em.create(User, {
-    //         username: body.username,
-    //         firstName: body.firstName,
-    //         lastName: body.lastName,
-    //     });
+    private async createUser(ctx: Context) {
+        const body = await this.json();
+        const validated = validate<TCreate>(createSchema, body);
+        const user = DI.em.create(User, {
+            username: validated.username,
+            name: validated.name,
+            profileBanner: validated.profileBanner,
+            avatar: validated.avatar,
+            isPrivate: false
+        });
 
-    //     await DI.em.persistAndFlush(user);
+        if ('isPrivate' in validated) {
+            user.isPrivate = validated.isPrivate ?? false;
+        }
 
-    //     ctx.status = 201;
-    // }
+        await DI.em.persistAndFlush(user);
 
-    // private async getUsers(ctx: Context) {
-    //     const users = await DI.em.find(User, {}, { limit: 10 });
+        ctx.status = 201;
+    }
 
-    //     ctx.status = 200;
-    //     ctx.body = users;
-    // }
+    private async getUsers(ctx: Context) {
+        const users = await DI.userRepository.findAllWithJoins();
+
+        ctx.status = 200;
+        ctx.body = users.map(format);
+    }
 
     // private async getUser(ctx: Context) {
     //     const user = await DI.em.findOneOrFail(User, ctx.params.username);
@@ -59,8 +79,8 @@ export default class UserController extends AbstractController {
     public routes(): Router.IMiddleware<any, {}> {
         const router = new Router();
 
-        // router.post('s', this.createMiddleware(this.createUser));
-        // router.get('s', this.createMiddleware(this.getUsers));
+        router.post('s', this.createMiddleware(this.createUser));
+        router.get('s', this.createMiddleware(this.getUsers));
         // router.get('/:username', this.createMiddleware(this.getUser));
         // router.put('/:username', this.createMiddleware(this.updateUser));
         // router.delete('/:username', this.createMiddleware(this.deleteUser));
