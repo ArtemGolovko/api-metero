@@ -37,7 +37,7 @@ export class BadRequest extends AbstractException {
     public body(): TBody {
         return {
             code: `400:${this.context.code}`,
-            message: this.getMessage(),
+            message: 'Bad Request: ' + this.getMessage(),
             hint: this.getHint()
         }
     }

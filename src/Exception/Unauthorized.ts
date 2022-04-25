@@ -34,7 +34,7 @@ export default class Unauthorized extends AbstractException {
     public body(): TBody {
         return {
             code: `401:${this.context.code}`,
-            message: this.getMessage(),
+            message: 'Unauthorized: ' + this.getMessage(),
             hint: this.getHint()
         }
     }
