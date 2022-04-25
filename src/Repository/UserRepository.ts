@@ -23,7 +23,7 @@ export default class UserRepository extends EntityRepository<User> {
             .getResultList();
     }
 
-    public async findOneWithJoins(username: string, limit = 10) {
+    public async findOneWithJoins(username: string) {
         const user = await this.userQuery()
             .where(username)
             .getSingleResult();

@@ -5,7 +5,7 @@ export type TCreate = {
     name: string,
     profileBanner: string,
     avatar: string,
-    isPrivate?: boolean
+    isPrivate: boolean
 }
 
 export const createSchema = Joi.object({
@@ -13,5 +13,5 @@ export const createSchema = Joi.object({
     name: Joi.string().max(255).required(),
     profileBanner: Joi.string().max(255).required(),
     avatar: Joi.string().max(255).required(),
-    isPrivate: Joi.boolean().optional()
+    isPrivate: Joi.boolean().optional().default(false)
 });

@@ -21,17 +21,14 @@ export default class UserController extends AbstractController {
     private async createUser(ctx: Context) {
         const body = await this.json();
         const validated = validate<TCreate>(createSchema, body);
+
         const user = DI.em.create(User, {
             username: validated.username,
             name: validated.name,
             profileBanner: validated.profileBanner,
             avatar: validated.avatar,
-            isPrivate: false
+            isPrivate: validated.isPrivate
         });
-
-        if ('isPrivate' in validated) {
-            user.isPrivate = validated.isPrivate ?? false;
-        }
 
         await DI.em.persistAndFlush(user);
 
