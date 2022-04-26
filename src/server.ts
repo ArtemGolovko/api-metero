@@ -1,4 +1,4 @@
-import Koa, { Context, Next } from 'koa';
+import Koa from 'koa';
 import logger from 'koa-logger';
 import { EntityManager, MikroORM, RequestContext } from '@mikro-orm/core';
 
