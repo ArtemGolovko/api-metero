@@ -5,8 +5,8 @@ import NotFound, { CODE } from "../Exception/NotFound";
 export default class UserRepository extends EntityRepository<User> {
     private userQuery() {
         return this.createQueryBuilder('user')
-            .select('*')
-            .addSelect([
+            .select([
+                'user.*',
                 'subscribers.username as subscribersUsername',
                 'subscribed.username as subscribedUsername',
                 'count(subscribers.username) as subscribersCount',
@@ -14,6 +14,7 @@ export default class UserRepository extends EntityRepository<User> {
             ])
             .leftJoin('user.subscribers', 'subscribers')
             .leftJoin('user.subscribed', 'subscribed')
+            .groupBy('user.username')
         ;
     }
 
