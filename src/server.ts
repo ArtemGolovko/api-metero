@@ -8,7 +8,7 @@ import handler from './Exception/HandleKoaErrors';
 
 import UserRepository from './Repository/UserRepository';
 import User from './Entity/User';
-import { CORSandCSP } from './Controller/browserSecurity';
+import { CORSandCSP } from './Security/browserSecurity';
 
 console.time("Bootstrap");
 
