@@ -15,3 +15,18 @@ export const createSchema = Joi.object({
     avatar: Joi.string().max(255).required(),
     isPrivate: Joi.boolean().optional().default(false)
 });
+
+
+export type TUpdate = {
+    name?: string,
+    profileBanner?: string,
+    avatar?: string,
+    isPrivate?: boolean
+}
+
+export const updateSchema = Joi.object({
+    name: Joi.string().max(255).optional(),
+    profileBanner: Joi.string().max(255).optional(),
+    avatar: Joi.string().max(255).optional(),
+    isPrivate: Joi.boolean().optional()
+}).required().min(1)

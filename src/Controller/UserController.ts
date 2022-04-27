@@ -2,10 +2,12 @@ import { Context } from "koa";
 import Router from "koa-router";
 import User from "../Entity/User";
 import { DI } from "../server";
-import { createSchema } from "../Validator/Schema/UserSchema";
+import { createSchema, TUpdate, updateSchema } from "../Validator/Schema/UserSchema";
 import type { TCreate } from "../Validator/Schema/UserSchema";
 import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
+import NotFound, { CODE } from "../Exception/NotFound";
+import { MergeOptions } from "@mikro-orm/core";
 
 export const format = (user: User) => ({
     username: user.username,
@@ -42,29 +44,30 @@ export default class UserController extends AbstractController {
         ctx.body = users.map(format);
     }
 
-    // private async getUser(ctx: Context) {
-    //     const user = await DI.em.findOneOrFail(User, ctx.params.username);
+    private async getUser(ctx: Context) {
+        const user = await DI.userRepository.findOneWithJoins(ctx.params.username);
 
-    //     ctx.status = 200;
-    //     ctx.body = user;
-    // }
+        ctx.status = 200;
+        ctx.body = format(user);
+    }
 
-    // private async updateUser(ctx: Context) {
-    //     const user = await DI.em.findOneOrFail(User, ctx.params.username);
-    //     const body = await this.json();
+    private async updateUser(ctx: Context) {
+        const user = await DI.userRepository.findOne(ctx.params.username);
+        if (user === null) throw new NotFound({
+            code: CODE.RosourceNotFound,
+            resoure: 'user',
+            id: ctx.params.username
+        });
 
-    //     if ('firstName' in body) {
-    //         user.firstName = body.firstName;
-    //     }
-        
-    //     if ('lastName' in body) {
-    //         user.lastName = body.lastName;
-    //     }
+        const body = await this.json();
+        const validated = validate<TUpdate>(updateSchema, body);
 
-    //     await DI.em.flush()
+        DI.userRepository.mergeEntity(user, validated);
 
-    //     ctx.status = 200;
-    // }
+        await DI.em.flush()
+
+        ctx.status = 200;
+    }
 
     // private async deleteUser(ctx: Context) {
     //     const user = await DI.em.findOneOrFail(User, ctx.params.username);
@@ -78,8 +81,8 @@ export default class UserController extends AbstractController {
 
         router.post('s', this.createMiddleware(this.createUser));
         router.get('s', this.createMiddleware(this.getUsers));
-        // router.get('/:username', this.createMiddleware(this.getUser));
-        // router.put('/:username', this.createMiddleware(this.updateUser));
+        router.get('/:username', this.createMiddleware(this.getUser));
+        router.put('/:username', this.createMiddleware(this.updateUser));
         // router.delete('/:username', this.createMiddleware(this.deleteUser));
 
         return router.routes();

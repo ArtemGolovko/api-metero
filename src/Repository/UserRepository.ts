@@ -1,6 +1,8 @@
+import { EntityData, MergeOptions } from "@mikro-orm/core";
 import { EntityRepository } from "@mikro-orm/mysql";
 import User from "../Entity/User";
 import NotFound, { CODE } from "../Exception/NotFound";
+import { hasProperty } from "../TSHelper";
 
 export default class UserRepository extends EntityRepository<User> {
     private userQuery() {
@@ -26,7 +28,7 @@ export default class UserRepository extends EntityRepository<User> {
 
     public async findOneWithJoins(username: string) {
         const user = await this.userQuery()
-            .where(username)
+            .where({ username: username })
             .getSingleResult();
 
         if (user === null) throw new NotFound({
@@ -36,5 +38,12 @@ export default class UserRepository extends EntityRepository<User> {
         });
 
         return user;
+    }
+
+    public mergeEntity(user: User, partial: Partial<User>) {
+        for (const key of Object.keys(partial)) {
+            if (hasProperty(user, key) && hasProperty(partial, key))
+                user[key] = partial[key];
+        }
     }
 }
