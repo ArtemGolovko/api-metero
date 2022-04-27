@@ -52,19 +52,10 @@ export default class UserController extends AbstractController {
     }
 
     private async updateUser(ctx: Context) {
-        const user = await DI.userRepository.findOne(ctx.params.username);
-        if (user === null) throw new NotFound({
-            code: CODE.RosourceNotFound,
-            resoure: 'user',
-            id: ctx.params.username
-        });
-
         const body = await this.json();
         const validated = validate<TUpdate>(updateSchema, body);
 
-        DI.userRepository.mergeEntity(user, validated);
-
-        await DI.em.flush()
+        await DI.userRepository.update(ctx.params.username, validated);
 
         ctx.status = 200;
     }

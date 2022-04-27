@@ -2,7 +2,6 @@ import { EntityData, MergeOptions } from "@mikro-orm/core";
 import { EntityRepository } from "@mikro-orm/mysql";
 import User from "../Entity/User";
 import NotFound, { CODE } from "../Exception/NotFound";
-import { hasProperty } from "../TSHelper";
 
 export default class UserRepository extends EntityRepository<User> {
     private userQuery() {
@@ -40,10 +39,16 @@ export default class UserRepository extends EntityRepository<User> {
         return user;
     }
 
-    public mergeEntity(user: User, partial: Partial<User>) {
-        for (const key of Object.keys(partial)) {
-            if (hasProperty(user, key) && hasProperty(partial, key))
-                user[key] = partial[key];
-        }
+    public async update(username: string, partial: EntityData<User>) {
+        const result = await this.createQueryBuilder()
+            .update(partial)
+            .where({ username: username })
+            .execute();
+        
+        if (result.affectedRows === 0) throw new NotFound({
+            code: CODE.RosourceNotFound,
+            resoure: 'user',
+            id: username
+        });
     }
 }
