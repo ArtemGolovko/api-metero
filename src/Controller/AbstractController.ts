@@ -33,5 +33,6 @@ export default abstract class AbstractController {
     public prefix(): string {
         return '/';
     }
+    
     public abstract routes(): Router.IMiddleware<any, {}>;
 }

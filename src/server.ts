@@ -8,6 +8,7 @@ import handler from './Exception/HandleKoaErrors';
 
 import UserRepository from './Repository/UserRepository';
 import User from './Entity/User';
+import { CORSandCSP } from './Controller/browserSecurity';
 
 console.time("Bootstrap");
 
@@ -38,6 +39,7 @@ const port = process.env.PORT || 3000;
     app.use(handler);
     app.use(Router.routes());
     app.use(Router.allowedMethods());
+    app.use(CORSandCSP);
   
     app.listen(port, () => {
       console.log(`MikroORM Koa TS API started at http://localhost:${port}`);
