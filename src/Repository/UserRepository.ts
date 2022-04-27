@@ -51,4 +51,17 @@ export default class UserRepository extends EntityRepository<User> {
             id: username
         });
     }
+
+    public async delete(username: string) {
+        const result = await this.createQueryBuilder()
+            .delete()
+            .where({ username: username })
+            .execute();
+        
+        if (result.affectedRows === 0) throw new NotFound({
+            code: CODE.RosourceNotFound,
+            resoure: 'user',
+            id: username
+        });
+    }
 }

@@ -60,12 +60,10 @@ export default class UserController extends AbstractController {
         ctx.status = 200;
     }
 
-    // private async deleteUser(ctx: Context) {
-    //     const user = await DI.em.findOneOrFail(User, ctx.params.username);
-
-    //     await DI.em.removeAndFlush(user);
-    //     ctx.status = 204;
-    // }
+    private async deleteUser(ctx: Context) {
+        await DI.userRepository.delete(ctx.params.username);
+        ctx.status = 204;
+    }
 
     public routes(): Router.IMiddleware<any, {}> {
         const router = new Router();
@@ -74,7 +72,7 @@ export default class UserController extends AbstractController {
         router.get('s', this.createMiddleware(this.getUsers));
         router.get('/:username', this.createMiddleware(this.getUser));
         router.put('/:username', this.createMiddleware(this.updateUser));
-        // router.delete('/:username', this.createMiddleware(this.deleteUser));
+        router.delete('/:username', this.createMiddleware(this.deleteUser));
 
         return router.routes();
     }
