@@ -75,6 +75,24 @@ export default class UserController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async userUnsubscribe(ctx: Context) {
+        const loggedUserUsername = this.auth();
+        const user = await DI.userRepository.findOneOrFail({
+            username: ctx.params.username
+        }, {
+            populate: ['subscribers']
+        }).catch(() => this.createNotFound('user', ctx.params.username));
+
+        const loggedUser = await DI.userRepository.findOneOrFail({
+            username: loggedUserUsername
+        }).catch(() => { throw new Unauthorized({ code: CODE.NotFound })});
+
+            user.subscribers.remove(loggedUser);
+
+            await DI.userRepository.persistAndFlush(user);
+            ctx.status = 200;
+    }
+
     private async deleteUser(ctx: Context) {
         await DI.userRepository.delete(ctx.params.username);
         ctx.status = 204;
@@ -88,6 +106,7 @@ export default class UserController extends AbstractController {
         router.get('/:username', this.createMiddleware(this.getUser));
         router.put('/:username', this.createMiddleware(this.updateUser));
         router.post('/:username/subscribe', this.createMiddleware(this.userSubscribe));
+        router.post('/:username/unsubscribe', this.createMiddleware(this.userUnsubscribe));
         router.delete('/:username', this.createMiddleware(this.deleteUser));
 
         return router.routes();

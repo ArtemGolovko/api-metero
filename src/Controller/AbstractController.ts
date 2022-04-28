@@ -20,7 +20,6 @@ export default abstract class AbstractController {
                 const { status, body, headers } = handleException(error);
                 ctx.status = status;
                 ctx.body = body;
-                console.log(headers);
                 if (headers !== null) ctx.set(headers);
             }
             await next();
