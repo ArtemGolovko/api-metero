@@ -54,9 +54,7 @@ export default class Unauthorized extends AbstractException {
                 break;
         }
         return {
-            'WWW-Authenticate': `Bearer realm="Metero API",
-                       error="${error}",
-                       error_description="${this.getMessage()}"`
+            'WWW-Authenticate': `Bearer realm="Metero API", error="${error}", error_description="${this.getMessage()}"`
         };
     }
 }
