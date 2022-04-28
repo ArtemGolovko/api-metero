@@ -32,7 +32,7 @@ export default class UserRepository extends EntityRepository<User> {
 
         if (user === null) throw new NotFound({
             code: CODE.RosourceNotFound,
-            resoure: 'user',
+            resource: 'user',
             id: username
         });
 
@@ -47,7 +47,7 @@ export default class UserRepository extends EntityRepository<User> {
         
         if (result.affectedRows === 0) throw new NotFound({
             code: CODE.RosourceNotFound,
-            resoure: 'user',
+            resource: 'user',
             id: username
         });
     }
@@ -60,7 +60,7 @@ export default class UserRepository extends EntityRepository<User> {
         
         if (result.affectedRows === 0) throw new NotFound({
             code: CODE.RosourceNotFound,
-            resoure: 'user',
+            resource: 'user',
             id: username
         });
     }

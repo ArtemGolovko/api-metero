@@ -8,7 +8,7 @@ export const enum CODE {
 
 type TContext = {
     code: CODE,
-    resoure?: string,
+    resource?: string,
     id?: string|number
 }
 
@@ -22,10 +22,10 @@ export default class NotFound extends AbstractException {
     private getMessage() {
         if (this.context.code === CODE.PageNotFound) return 'Page not found';
 
-        if (this.context.resoure === undefined || this.context.id === undefined)
+        if (this.context.resource === undefined || this.context.id === undefined)
             return 'Not Found: Resource not found';
 
-        return `Not Found: The ${this.context.resoure} resource with identifier '${this.context.id}' not found`;
+        return `Not Found: The ${this.context.resource} resource with identifier '${this.context.id}' not found`;
     }
 
     private getHint() {
