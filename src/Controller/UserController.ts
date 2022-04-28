@@ -2,12 +2,11 @@ import { Context } from "koa";
 import Router from "koa-router";
 import User from "../Entity/User";
 import { DI } from "../server";
-import { createSchema, TUpdate, updateSchema } from "../Validator/Schema/UserSchema";
-import type { TCreate } from "../Validator/Schema/UserSchema";
+import { createSchema, updateSchema } from "../Validator/Schema/UserSchema";
+import type { TCreate, TUpdate } from "../Validator/Schema/UserSchema";
 import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
-import NotFound, { CODE } from "../Exception/NotFound";
-import { MergeOptions } from "@mikro-orm/core";
+import Unauthorized, { CODE } from "../Exception/Unauthorized";
 
 export const format = (user: User) => ({
     username: user.username,
@@ -60,6 +59,22 @@ export default class UserController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async userSubscribe(ctx: Context) {
+        const loggedUserUsername = this.auth();
+        const user = await DI.userRepository.findOneOrFail({
+            username: ctx.params.username
+        }).catch(() => this.createNotFound('user', ctx.params.username));
+
+        const loggedUser = await DI.userRepository.findOneOrFail({
+            username: loggedUserUsername
+        }).catch(() => { throw new Unauthorized({ code: CODE.NotFound })});
+
+        user.subscribers.add(loggedUser);
+
+        await DI.userRepository.persistAndFlush(user);
+        ctx.status = 200;
+    }
+
     private async deleteUser(ctx: Context) {
         await DI.userRepository.delete(ctx.params.username);
         ctx.status = 204;
@@ -72,6 +87,7 @@ export default class UserController extends AbstractController {
         router.get('s', this.createMiddleware(this.getUsers));
         router.get('/:username', this.createMiddleware(this.getUser));
         router.put('/:username', this.createMiddleware(this.updateUser));
+        router.post('/:username/subscribe', this.createMiddleware(this.userSubscribe));
         router.delete('/:username', this.createMiddleware(this.deleteUser));
 
         return router.routes();
