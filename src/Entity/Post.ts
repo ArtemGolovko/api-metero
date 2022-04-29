@@ -1,10 +1,13 @@
-import { Collection, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, types } from "@mikro-orm/core";
+import { Collection, Entity, EntityRepositoryType, ManyToMany, ManyToOne, OneToMany, PrimaryKey, Property, types } from "@mikro-orm/core";
 import Hashtag from "./Hashtag";
 import User from "./User";
 import Comment from './Comment';
+import PostRepository from "../Repository/PostRepository";
 
 @Entity()
 export default class Post {
+    [EntityRepositoryType]?: PostRepository
+
     @PrimaryKey({ type: types.integer, autoincrement: true })
     id!: number
 

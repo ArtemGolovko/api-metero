@@ -9,6 +9,8 @@ import handler from './Exception/HandleKoaErrors';
 import UserRepository from './Repository/UserRepository';
 import User from './Entity/User';
 import { CORSandCSP } from './Security/browserSecurity';
+import PostRepository from './Repository/PostRepository';
+import Post from './Entity/Post';
 
 console.time("Bootstrap");
 
@@ -20,6 +22,7 @@ export const DI = {
   orm: MikroORM,
   em: EntityManager,
   userRepository: UserRepository,
+  postRepository: PostRepository
   logger: typeof defaultLogger
 };
 
@@ -31,6 +34,7 @@ const port = process.env.PORT || 3000;
     DI.orm = await MikroORM.init();
     DI.em = DI.orm.em;
     DI.userRepository = DI.em.getRepository(User);
+    DI.postRepository = DI.em.getRepository(Post);
   
     app.use((ctx, next) => RequestContext.createAsync(DI.orm.em, next));
     app.use(logger({
