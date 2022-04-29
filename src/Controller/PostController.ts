@@ -99,6 +99,51 @@ export default class PostController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async likePost(ctx: Context) {
+        const loggedUser = await DI.userRepository.findOneOrFail(
+            { username: this.auth() }
+        ).catch(() => this.createUnauthorized(CODE.NotFound));
+
+        const post = await DI.postRepository.findOneOrFail(
+            { id: ctx.params.id }
+        ).catch(() => this.createNotFound('post', ctx.params.id));
+
+        post.likes.add(loggedUser);
+
+        await DI.em.flush();
+        ctx.status = 200;
+    }
+
+    private async unlikePost(ctx: Context) {
+        const loggedUser = await DI.userRepository.findOneOrFail(
+            { username: this.auth() }
+        ).catch(() => this.createUnauthorized(CODE.NotFound));
+
+        const post = await DI.postRepository.findOneOrFail(
+            { id: ctx.params.id },
+            { populate: ['likes'] }
+        ).catch(() => this.createNotFound('post', ctx.params.id));
+
+        post.likes.remove(loggedUser);
+
+        await DI.em.flush();
+        ctx.status = 200;
+    }
+
+    private async deletePost(ctx: Context) {
+        const loggedUserUsername = this.auth();
+
+        const post = await DI.postRepository.findOneOrFail(
+            { id: ctx.params.id },
+            { populate: ['author'] }
+        ).catch(() => this.createNotFound('post', ctx.params.id));
+
+        if (post.author.username !== loggedUserUsername) throw new Forbidden();
+
+        await DI.em.removeAndFlush(post);
+        ctx.status = 204;
+    }
+
     private async hashtags(names: string[]): Promise<Hashtag[]> {
         const hashtags = await DI.hashtagRepository.find(
             { name: names }
@@ -131,7 +176,10 @@ export default class PostController extends AbstractController {
         router.post('s', this.createMiddleware(this.createPost));
         router.get('s', this.createMiddleware(this.getPosts));
         router.get('/:id', this.createMiddleware(this.getPost));
-        router.put('/:id', this.createMiddleware(this.updatePost))
+        router.put('/:id', this.createMiddleware(this.updatePost));
+        router.post('/:id/like', this.createMiddleware(this.likePost));
+        router.post('/:id/unlike', this.createMiddleware(this.unlikePost));
+        router.delete('/:id', this.createMiddleware(this.deletePost));
 
         return router.routes();
     }
