@@ -6,6 +6,22 @@ import validate from "../Validator/Validate";
 import { createSchema, TCreate } from "../Validator/Schema/PostSchema";
 import AbstractController from "./AbstractController";
 import Hashtag from "../Entity/Hashtag";
+import Post from "../Entity/Post";
+
+export const format = (post: Post) => ({
+    id: post.id,
+    author: {
+        username: post.author.username,
+        name: post.author.name
+    },
+    date: post.createdAt.getTime(),
+    dateUpdated: post.updatedAt?.getTime(),
+    text: post.text,
+    hashtags: post.hashtags.getItems().map(hashtag => hashtag.name),
+    profileMarks: post.markedUsers.getItems().map(user => user.username),
+    images: post.images,
+    likes: post.likesCount
+})
 
 export default class PostController extends AbstractController {
     private async createPost(ctx: Context) {
@@ -34,6 +50,20 @@ export default class PostController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async getPosts(ctx: Context) {
+        const posts = await DI.postRepository.findAllWithJoins();
+
+        ctx.body = posts.map(format);
+        ctx.status = 200;
+    }
+
+    private async getPost(ctx: Context) {
+        const post = await DI.postRepository.findOneWithJoins(ctx.params.id);
+
+        ctx.body = format(post);
+        ctx.status = 200;
+    }
+
     private async hashtags(names: string[]): Promise<Hashtag[]> {
         const hashtags = await DI.hashtagRepository.find({
             name: names
@@ -57,6 +87,8 @@ export default class PostController extends AbstractController {
         const router = new Router();
 
         router.post('s', this.createMiddleware(this.createPost));
+        router.get('s', this.createMiddleware(this.getPosts));
+        router.get('/:id', this.createMiddleware(this.getPost));
 
         return router.routes();
     }
