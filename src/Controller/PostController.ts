@@ -9,6 +9,14 @@ import AbstractController from "./AbstractController";
 import Hashtag from "../Entity/Hashtag";
 import Post from "../Entity/Post";
 import Forbidden from "../Exception/Forbidden";
+import moment from "moment";
+
+const createDiff = (date: Date|null|undefined) => {
+    if (date === undefined) return undefined;
+    if (date === null) return undefined;
+
+    return moment(date.getTime()).locale('ru').fromNow()
+}
 
 export const format = (post: Post) => ({
     id: post.id,
@@ -17,7 +25,9 @@ export const format = (post: Post) => ({
         name: post.author.name
     },
     date: post.createdAt.getTime(),
+    dateDiff: createDiff(post.createdAt),
     dateUpdated: post.updatedAt?.getTime(),
+    dateUpdatedDiff: createDiff(post.updatedAt),
     text: post.text,
     hashtags: post.hashtags.getItems().map(hashtag => hashtag.name),
     profileMarks: post.markedUsers.getItems().map(user => user.username),
