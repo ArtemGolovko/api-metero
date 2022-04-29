@@ -38,6 +38,4 @@ export default class PostRepository extends EntityRepository<Post> {
 
         return post;
     }
-
-
 }

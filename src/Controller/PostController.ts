@@ -1,12 +1,14 @@
 import { Context } from "koa";
 import Router, { IMiddleware } from "koa-router";
-import Unauthorized, { CODE } from "../Exception/Unauthorized";
+import { CODE } from "../Exception/Unauthorized";
 import { DI } from "../server";
 import validate from "../Validator/Validate";
-import { createSchema, TCreate } from "../Validator/Schema/PostSchema";
+import { createSchema, updateSchema } from "../Validator/Schema/PostSchema";
+import type { TCreate, TUpdate } from '../Validator/Schema/PostSchema';
 import AbstractController from "./AbstractController";
 import Hashtag from "../Entity/Hashtag";
 import Post from "../Entity/Post";
+import Forbidden from "../Exception/Forbidden";
 
 export const format = (post: Post) => ({
     id: post.id,
@@ -25,9 +27,9 @@ export const format = (post: Post) => ({
 
 export default class PostController extends AbstractController {
     private async createPost(ctx: Context) {
-        const user = await DI.userRepository.findOneOrFail({
-            username: this.auth()
-        }).catch(() => { throw new Unauthorized({ code: CODE.NotFound }) });
+        const user = await DI.userRepository.findOneOrFail(
+            { username: this.auth() }
+        ).catch(() => this.createUnauthorized(CODE.NotFound));
 
         const body = validate<TCreate>(createSchema, await this.json());
         const post = DI.postRepository.create({
@@ -39,11 +41,7 @@ export default class PostController extends AbstractController {
 
         post.hashtags.set(await this.hashtags(body.hashtags));
 
-        const markedUsers = await DI.userRepository.find({
-             username: body.profileMarks
-        });
-
-        post.markedUsers.set(markedUsers);
+        post.markedUsers.set(await this.markedUsers(body.profileMarks));
 
         await DI.em.persistAndFlush(post);
 
@@ -64,10 +62,37 @@ export default class PostController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async updatePost(ctx: Context) {
+        const loggedUserUsername = this.auth();
+        const post = await DI.postRepository.findOneOrFail(
+            { id: ctx.params.id },
+            { populate: ['author'] }
+        ).catch(() => this.createNotFound('post', ctx.params.id));
+
+        if (post.author.username !== loggedUserUsername) throw new Forbidden();
+
+        const body = validate<TUpdate>(updateSchema, await this.json());
+
+        post.updatedAt = new Date();
+
+        if (body.text !== undefined) post.text = body.text;
+
+        if (body.hashtags !== undefined)
+            post.hashtags.set(await this.hashtags(body.hashtags));
+
+        if (body.profileMarks !== undefined)
+            post.markedUsers.set(await this.markedUsers(body.profileMarks));
+
+        if (body.images !== undefined) post.images = body.images;
+
+        await DI.em.flush();
+        ctx.status = 200;
+    }
+
     private async hashtags(names: string[]): Promise<Hashtag[]> {
-        const hashtags = await DI.hashtagRepository.find({
-            name: names
-        });
+        const hashtags = await DI.hashtagRepository.find(
+            { name: names }
+        );
 
         const foundHashtags = hashtags.map(hashtag => hashtag.name);
 
@@ -75,12 +100,19 @@ export default class PostController extends AbstractController {
 
         if (newHashtags.length !== 0) {
             await DI.hashtagRepository.createMany(newHashtags);
-            return await DI.hashtagRepository.find({
-                name: names
-            });
+
+            return await DI.hashtagRepository.find(
+                { name: names }
+            );
         }
 
         return hashtags;
+    }
+
+    private async markedUsers(usernames: string[]) {
+        return await DI.userRepository.find(
+            { username: usernames }
+        );
     }
 
     public routes(): IMiddleware<any, {}> {
@@ -89,6 +121,7 @@ export default class PostController extends AbstractController {
         router.post('s', this.createMiddleware(this.createPost));
         router.get('s', this.createMiddleware(this.getPosts));
         router.get('/:id', this.createMiddleware(this.getPost));
+        router.put('/:id', this.createMiddleware(this.updatePost))
 
         return router.routes();
     }
