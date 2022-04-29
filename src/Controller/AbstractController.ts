@@ -36,16 +36,16 @@ export default abstract class AbstractController {
         if (this.context === null) throw new Error('No context');
 
         if (this.context.headers['authorization'] === undefined) {
-            throw new Unauthorized({ code: CODE.NoAuthorization });
+            this.createUnauthorized(CODE.NoAuthorization);
         }
         const authorization: string[] = this.context.headers['authorization'].split(' ');
     
         if (authorization.length < 2) {
-            throw new Unauthorized({ code: CODE.NoAuthorization });
+            this.createUnauthorized(CODE.NoAuthorization);
         }
     
         if (authorization[0].toLowerCase() !== 'bearer') {
-            throw new Unauthorized({ code: CODE.NoAuthorization });
+            this.createUnauthorized(CODE.NoAuthorization);
         }
     
         return authorization[1];
@@ -53,6 +53,10 @@ export default abstract class AbstractController {
 
     protected createNotFound(resource: string, id: string): never {
         throw new NotFound({ code: NotFoundCODE.RosourceNotFound, resource: resource, id: id });
+    }
+
+    protected createUnauthorized(code: CODE): never {
+        throw new Unauthorized({ code });
     }
 
     public prefix(): string {

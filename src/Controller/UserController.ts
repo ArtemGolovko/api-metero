@@ -20,15 +20,14 @@ export const format = (user: User) => ({
 
 export default class UserController extends AbstractController {
     private async createUser(ctx: Context) {
-        const body = await this.json();
-        const validated = validate<TCreate>(createSchema, body);
+        const body = validate<TCreate>(createSchema, await this.json());
 
         const user = DI.em.create(User, {
-            username: validated.username,
-            name: validated.name,
-            profileBanner: validated.profileBanner,
-            avatar: validated.avatar,
-            isPrivate: validated.isPrivate
+            username: body.username,
+            name: body.name,
+            profileBanner: body.profileBanner,
+            avatar: body.avatar,
+            isPrivate: body.isPrivate
         });
 
         await DI.em.persistAndFlush(user);
@@ -51,23 +50,21 @@ export default class UserController extends AbstractController {
     }
 
     private async updateUser(ctx: Context) {
-        const body = await this.json();
-        const validated = validate<TUpdate>(updateSchema, body);
+        const body = validate<TUpdate>(updateSchema, await this.json());
 
-        await DI.userRepository.update(ctx.params.username, validated);
+        await DI.userRepository.update(ctx.params.username, body);
 
         ctx.status = 200;
     }
 
     private async userSubscribe(ctx: Context) {
-        const loggedUserUsername = this.auth();
+        const loggedUser = await DI.userRepository.findOneOrFail({
+            username: this.auth()
+        }).catch(() => this.createUnauthorized(CODE.NotFound));
+
         const user = await DI.userRepository.findOneOrFail({
             username: ctx.params.username
         }).catch(() => this.createNotFound('user', ctx.params.username));
-
-        const loggedUser = await DI.userRepository.findOneOrFail({
-            username: loggedUserUsername
-        }).catch(() => { throw new Unauthorized({ code: CODE.NotFound })});
 
         user.subscribers.add(loggedUser);
 
@@ -76,21 +73,22 @@ export default class UserController extends AbstractController {
     }
 
     private async userUnsubscribe(ctx: Context) {
-        const loggedUserUsername = this.auth();
+        const loggedUser = await DI.userRepository.findOneOrFail({
+            username: this.auth()
+        }).catch(() => this.createUnauthorized(CODE.NotFound));
+
         const user = await DI.userRepository.findOneOrFail({
             username: ctx.params.username
         }, {
             populate: ['subscribers']
         }).catch(() => this.createNotFound('user', ctx.params.username));
 
-        const loggedUser = await DI.userRepository.findOneOrFail({
-            username: loggedUserUsername
-        }).catch(() => { throw new Unauthorized({ code: CODE.NotFound })});
+        
 
-            user.subscribers.remove(loggedUser);
+        user.subscribers.remove(loggedUser);
 
-            await DI.userRepository.persistAndFlush(user);
-            ctx.status = 200;
+        await DI.userRepository.persistAndFlush(user);
+        ctx.status = 200;
     }
 
     private async deleteUser(ctx: Context) {
