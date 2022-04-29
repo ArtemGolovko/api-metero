@@ -2,7 +2,7 @@ import { Collection, Entity, EntityRepositoryType, ManyToMany, PrimaryKey, Prope
 import HashtagRepository from "../Repository/HashtagRepository";
 import Post from "./Post";
 
-@Entity()
+@Entity({ customRepository: () => HashtagRepository })
 export default class Hashtag {
     [EntityRepositoryType]?: HashtagRepository
 
