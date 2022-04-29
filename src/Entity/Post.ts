@@ -4,7 +4,7 @@ import User from "./User";
 import Comment from './Comment';
 import PostRepository from "../Repository/PostRepository";
 
-@Entity()
+@Entity({ customRepository: () => PostRepository })
 export default class Post {
     [EntityRepositoryType]?: PostRepository
 
@@ -37,4 +37,7 @@ export default class Post {
 
     @OneToMany(() => Comment, comment => comment.post)
     comments = new Collection<Comment>(this);
+
+    @Property({ persist: false })
+    likesCount?: number
 }
