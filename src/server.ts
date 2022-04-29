@@ -11,6 +11,8 @@ import User from './Entity/User';
 import { CORSandCSP } from './Security/browserSecurity';
 import PostRepository from './Repository/PostRepository';
 import Post from './Entity/Post';
+import HashtagRepository from './Repository/HashtagRepository';
+import Hashtag from './Entity/Hashtag';
 
 console.time("Bootstrap");
 
@@ -22,7 +24,8 @@ export const DI = {
   orm: MikroORM,
   em: EntityManager,
   userRepository: UserRepository,
-  postRepository: PostRepository
+  postRepository: PostRepository,
+  hashtagRepository: HashtagRepository,
   logger: typeof defaultLogger
 };
 
@@ -35,6 +38,7 @@ const port = process.env.PORT || 3000;
     DI.em = DI.orm.em;
     DI.userRepository = DI.em.getRepository(User);
     DI.postRepository = DI.em.getRepository(Post);
+    DI.hashtagRepository = DI.em.getRepository(Hashtag);
   
     app.use((ctx, next) => RequestContext.createAsync(DI.orm.em, next));
     app.use(logger({
