@@ -3,7 +3,8 @@ import type { TBody } from "./AbstractException";
 
 export const enum CODE {
     Validation = 0,
-    NotFound = 1
+    NotFound = 1,
+    InvaildBody = 2
 }
 
 type TContext = {
@@ -11,7 +12,7 @@ type TContext = {
     message?: string
 }
 
-export class BadRequest extends AbstractException {
+export default class BadRequest extends AbstractException {
     public constructor(
         private context: TContext
     ) {
@@ -20,10 +21,18 @@ export class BadRequest extends AbstractException {
 
     private getMessage() {
         switch (this.context.code) {
-            case CODE.Validation:
-                const ending = this.context.message ?? `. ${this.context.message}`;
+            case CODE.Validation: {
+                const ending = (this.context.message !== undefined)
+                    ? `. ${this.context.message}` : '';
                 return 'Validation error occured' + ending;
+            }
             case CODE.NotFound: return 'Resource not found';
+            case CODE.InvaildBody: {
+                const ending = (this.context.message !== undefined)
+                    ? '. ' + this.context.message : '';
+                console.log(ending);
+                return 'Body parsing error occured' + ending;
+            }
         }
     }
 
@@ -31,6 +40,7 @@ export class BadRequest extends AbstractException {
         switch (this.context.code) {
             case CODE.Validation: return 'to do';
             case CODE.NotFound: return 'to do';
+            case CODE.InvaildBody: return 'to do';
         }
     }
 

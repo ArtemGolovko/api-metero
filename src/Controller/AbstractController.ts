@@ -4,6 +4,7 @@ import parser from "co-body";
 import handleException from "../Exception/HandleException";
 import Unauthorized, { CODE } from "../Exception/Unauthorized";
 import NotFound, { CODE as NotFoundCODE } from "../Exception/NotFound";
+import BadRequest, { CODE as BadRequestCODE} from "../Exception/BadRequest";
 
 export default abstract class AbstractController {
 
@@ -29,7 +30,9 @@ export default abstract class AbstractController {
     protected async json(): Promise<any> {
         if (this.context === null) throw new Error('No context');
 
-        return await parser.json(this.context.req);
+        return await parser.json(this.context.req).catch((e) => {
+            throw new BadRequest({ code: BadRequestCODE.InvaildBody, message: e.message }) 
+        });
     }
 
     protected auth(): string|never {
