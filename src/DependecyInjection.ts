@@ -10,8 +10,6 @@ import CommentRepository from './Repository/CommentRepository';
 import Comment from './Entity/Comment';
 import { defaultLogger } from './logger';
 
-import { DI } from './server';
-
 export type TContainer = {
     orm: MikroORM,
     em: EntityManager,
@@ -23,7 +21,7 @@ export type TContainer = {
 };
 
 
-export const load = async () => {
+const load = async (DI: TContainer) => {
     DI.logger = defaultLogger;
     DI.orm = await MikroORM.init();
     DI.em = DI.orm.em;
@@ -32,3 +30,5 @@ export const load = async () => {
     DI.hashtagRepository = DI.em.getRepository(Hashtag);
     DI.commentRepository = DI.em.getRepository(Comment);
 };
+
+export default load;
