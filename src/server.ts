@@ -13,6 +13,8 @@ import PostRepository from './Repository/PostRepository';
 import Post from './Entity/Post';
 import HashtagRepository from './Repository/HashtagRepository';
 import Hashtag from './Entity/Hashtag';
+import CommentRepository from './Repository/CommentRepository';
+import Comment from './Entity/Comment';
 
 console.time("Bootstrap");
 
@@ -26,6 +28,7 @@ export const DI = {
   userRepository: UserRepository,
   postRepository: PostRepository,
   hashtagRepository: HashtagRepository,
+  commentRepository: CommentRepository,
   logger: typeof defaultLogger
 };
 
@@ -39,6 +42,7 @@ const port = process.env.PORT || 3000;
     DI.userRepository = DI.em.getRepository(User);
     DI.postRepository = DI.em.getRepository(Post);
     DI.hashtagRepository = DI.em.getRepository(Hashtag);
+    DI.commentRepository = DI.em.getRepository(Comment);
   
     app.use((ctx, next) => RequestContext.createAsync(DI.orm.em, next));
     app.use(logger({
