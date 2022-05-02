@@ -25,4 +25,7 @@ export default class Comment {
 
     @OneToMany(() => Reply, reply => reply.comment)
     replies = new Collection<Reply>(this);
+
+    @Property({ persist: false })
+    likesCount?: number
 }

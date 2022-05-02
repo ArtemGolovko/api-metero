@@ -15,6 +15,7 @@ type THandleResult = {
 
 const handleException = (exception: any): THandleResult => {
     if (!(exception instanceof AbstractException)) {
+        console.log(exception);
         DI.logger.warn('Nonstandart error occured ' + JSON.stringify(exception));
         exception = convertToException(exception);
     }

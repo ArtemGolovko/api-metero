@@ -18,6 +18,19 @@ export default class PostRepository extends EntityRepository<Post> {
         ;
     }
 
+    public async has(id: number) {
+        const post = await this.createQueryBuilder('post')
+            .select('post.id')
+            .where({ id: id })
+            .getSingleResult();
+
+        if (post === null) throw new NotFound({
+            code: CODE.RosourceNotFound,
+            resource: 'post',
+            id: id
+        });
+    }
+
     public async findAllWithJoins(limit = 10){
         return await this.postQuery()
             .limit(limit)
