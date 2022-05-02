@@ -19,6 +19,19 @@ export default class UserRepository extends EntityRepository<User> {
         ;
     }
 
+    public async has(username: string) {
+        const user = await this.createQueryBuilder('user')
+            .select('user.username')
+            .where({ username: username })
+            .getSingleResult();
+
+        if (user === null) throw new NotFound({
+            code: CODE.RosourceNotFound,
+            resource: 'user',
+            id: username
+        });
+    }
+
     public async findAllWithJoins(limit = 10) {
         return await this.userQuery()
             .limit(limit)

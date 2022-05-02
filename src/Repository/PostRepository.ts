@@ -38,4 +38,12 @@ export default class PostRepository extends EntityRepository<Post> {
 
         return post;
     }
+
+    public async findAllByAuthorUsername(username: string) {
+        return await this.postQuery()
+            .where(
+                { author: { username: username } }
+            )
+            .getResultList();
+    }
 }

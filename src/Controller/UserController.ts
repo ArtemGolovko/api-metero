@@ -6,7 +6,8 @@ import { createSchema, updateSchema } from "../Validator/Schema/UserSchema";
 import type { TCreate, TUpdate } from "../Validator/Schema/UserSchema";
 import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
-import Unauthorized, { CODE } from "../Exception/Unauthorized";
+import { CODE } from "../Exception/Unauthorized";
+import { format as postFormat } from './PostController';
 
 export const format = (user: User) => ({
     username: user.username,
@@ -93,6 +94,15 @@ export default class UserController extends AbstractController {
         ctx.status = 204;
     }
 
+    private async getPosts(ctx: Context) {
+        await DI.userRepository.has(ctx.params.username);
+
+        const posts = await DI.postRepository.findAllByAuthorUsername(ctx.params.username);
+
+        ctx.body = posts.map(postFormat);
+        ctx.status = 200;
+    }
+
     public routes(): Router.IMiddleware<any, {}> {
         const router = new Router();
 
@@ -103,6 +113,7 @@ export default class UserController extends AbstractController {
         router.post('/:username/subscribe', this.createMiddleware(this.userSubscribe));
         router.post('/:username/unsubscribe', this.createMiddleware(this.userUnsubscribe));
         router.delete('/:username', this.createMiddleware(this.deleteUser));
+        router.get('/:username/posts', this.createMiddleware(this.getPosts));
 
         return router.routes();
     }
