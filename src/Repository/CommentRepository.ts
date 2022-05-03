@@ -1,5 +1,6 @@
 import { EntityRepository } from "@mikro-orm/mysql";
 import Comment from "../Entity/Comment";
+import NotFound, { CODE } from "../Exception/NotFound";
 
 export default class CommentRepository extends EntityRepository<Comment> {
     private commentQuery() {
@@ -16,12 +17,27 @@ export default class CommentRepository extends EntityRepository<Comment> {
         ;
     }
 
-    public async findAllByPostId(postId: number) {
+    public async findAllByPostId(postId: number, limit = 10) {
         return await this.commentQuery()
             .where(
                 { post: { id: postId } }
             )
+            .limit(limit)
             .getResultList()
         ;
+    }
+
+    public async findOneWithJoins(id: number) {
+        const comment = await this.commentQuery()
+            .where({ id: id })
+            .getSingleResult();
+
+        if (comment === null) throw new NotFound({
+            code: CODE.RosourceNotFound,
+            resource: 'comment',
+            id: id
+        });
+
+        return comment;
     }
 }

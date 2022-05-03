@@ -39,11 +39,20 @@ export default class CommentController extends AbstractController {
         ctx.status = 200;
     } 
 
+    private async getCommnet(ctx: Context) {
+        const comment = await DI.commentRepository.findOneWithJoins(ctx.params.id);
+
+        console.log(comment);
+
+        ctx.status = 200;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
         router.post('/post/:postId/comments', this.createMiddleware(this.createComment));
         router.get('/post/:postId/comments', this.createMiddleware(this.getComments));
+        router.get('/comment/:id', this.createMiddleware(this.getCommnet));
 
         return router.routes();
     }
