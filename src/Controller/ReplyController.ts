@@ -1,12 +1,13 @@
 import { Context } from "koa";
 import Router, { IMiddleware } from "koa-router";
 import { DI } from "../server";
-import { createSchema } from "../Validator/Schema/ReplySchema";
-import type { TCreate } from '../Validator/Schema/ReplySchema';
+import { createSchema, updateSchema } from "../Validator/Schema/ReplySchema";
+import type { TCreate, TUpdate } from '../Validator/Schema/ReplySchema';
 import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
 import BadRequest, { CODE } from "../Exception/BadRequest";
 import Reply from "../Entity/Reply";
+import Forbidden from "../Exception/Forbidden";
 
 const format = (reply: Reply) => {
     const output = {
@@ -71,12 +72,31 @@ export default class ReplyController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async updateReply(ctx: Context) {
+        const loggedUserUsername = this.auth();
+
+        const reply = await DI.replyRepository.findOneOrFail(
+            { id: ctx.params.id },
+            { populate: ['author'] }
+        ).catch(() => this.createNotFound('reply', ctx.params.id));
+
+        if (reply.author.username !== loggedUserUsername) throw new Forbidden();
+
+        const body = validate<TUpdate>(updateSchema, await this.json());
+
+        reply.text = body.text;
+        
+        await DI.em.flush();
+        ctx.status = 200;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
         router.post('/comment/:commentId/replies', this.createMiddleware(this.createReply));
         router.get('/comment/:commentId/replies', this.createMiddleware(this.getReplies));
         router.get('/reply/:id', this.createMiddleware(this.getReply));
+        router.put('/reply/:id', this.createMiddleware(this.updateReply));
 
         return router.routes();
     }

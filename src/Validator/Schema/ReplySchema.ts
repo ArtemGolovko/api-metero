@@ -9,3 +9,11 @@ export const createSchema = Joi.object({
     text: Joi.string().required(),
     replyTo: Joi.string().max(255).pattern(/[a-zA-Z0-9_]+/).optional()
 });
+
+export type TUpdate = {
+    text: string
+}
+
+export const updateSchema = Joi.object({
+    text: Joi.string().required()
+});
