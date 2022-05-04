@@ -75,6 +75,31 @@ export default class CommentController extends AbstractController {
         ctx.status = 200;
     }
 
+    public async likeComment(ctx: Context) {
+        const loggedUser = await this.user();
+        const comment = await DI.commentRepository.findOneOrFail(
+            { id: ctx.params.id }
+        ).catch(() => this.createNotFound('comment', ctx.params.id));
+
+        comment.likes.add(loggedUser);
+
+        await DI.em.flush();
+        ctx.status = 200;
+    }
+
+    public async unlikeComment(ctx: Context) {
+        const loggedUser = await this.user();
+        const comment = await DI.commentRepository.findOneOrFail(
+            { id: ctx.params.id },
+            { populate: ['likes'] }
+        ).catch(() => this.createNotFound('comment', ctx.params.id));
+
+        comment.likes.remove(loggedUser);
+
+        await DI.em.flush();
+        ctx.status = 200;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
@@ -82,6 +107,8 @@ export default class CommentController extends AbstractController {
         router.get('/post/:postId/comments', this.createMiddleware(this.getComments));
         router.get('/comment/:id', this.createMiddleware(this.getCommnet));
         router.put('/comment/:id', this.createMiddleware(this.updateComment));
+        router.post('/comment/:id/like', this.createMiddleware(this.likeComment));
+        router.post('/comment/:id/unlike', this.createMiddleware(this.unlikeComment));
 
         return router.routes();
     }
