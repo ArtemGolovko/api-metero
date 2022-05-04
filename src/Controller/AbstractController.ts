@@ -5,6 +5,8 @@ import handleException from "../Exception/HandleException";
 import Unauthorized, { CODE } from "../Exception/Unauthorized";
 import NotFound, { CODE as NotFoundCODE } from "../Exception/NotFound";
 import BadRequest, { CODE as BadRequestCODE} from "../Exception/BadRequest";
+import { DI } from "../server";
+import User from "../Entity/User";
 
 export default abstract class AbstractController {
 
@@ -52,6 +54,12 @@ export default abstract class AbstractController {
         }
     
         return authorization[1];
+    }
+
+    protected async user(): Promise<User>|never {
+        return await DI.userRepository.findOneOrFail(
+            { username: this.auth() }
+        ).catch(() => this.createUnauthorized(CODE.NotFound))
     }
 
     protected createNotFound(resource: string, id: string): never {
