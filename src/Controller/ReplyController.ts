@@ -64,11 +64,19 @@ export default class ReplyController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async getReply(ctx: Context) {
+        const reply = await DI.replyRepository.fillOneWithJoins(ctx.params.id);
+
+        ctx.body = format(reply);
+        ctx.status = 200;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
         router.post('/comment/:commentId/replies', this.createMiddleware(this.createReply));
         router.get('/comment/:commentId/replies', this.createMiddleware(this.getReplies));
+        router.get('/reply/:id', this.createMiddleware(this.getReply));
 
         return router.routes();
     }
