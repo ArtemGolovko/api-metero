@@ -22,9 +22,7 @@ const format = (comment: Comment) => ({
 export default class CommentController extends AbstractController {
 
     public async createComment(ctx: Context) {
-        const loggedUser = await DI.userRepository.findOneOrFail(
-            { username: this.auth() }
-        ).catch(() => this.createUnauthorized(CODE.NotFound));
+        const loggedUser = await this.user();
         
         const post = await DI.postRepository.findOneOrFail(
             { id: ctx.params.postId }

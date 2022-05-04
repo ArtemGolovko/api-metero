@@ -37,9 +37,7 @@ export const format = (post: Post) => ({
 
 export default class PostController extends AbstractController {
     private async createPost(ctx: Context) {
-        const user = await DI.userRepository.findOneOrFail(
-            { username: this.auth() }
-        ).catch(() => this.createUnauthorized(CODE.NotFound));
+        const user = await this.user();
 
         const body = validate<TCreate>(createSchema, await this.json());
         const post = DI.postRepository.create({
