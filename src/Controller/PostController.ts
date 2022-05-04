@@ -53,7 +53,7 @@ export default class PostController extends AbstractController {
 
         await DI.em.persistAndFlush(post);
 
-        ctx.status = 200;
+        ctx.status = 201;
     }
 
     private async getPosts(ctx: Context) {
