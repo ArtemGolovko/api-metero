@@ -59,9 +59,7 @@ export default class UserController extends AbstractController {
     }
 
     private async userSubscribe(ctx: Context) {
-        const loggedUser = await DI.userRepository.findOneOrFail(
-            { username: this.auth() }
-        ).catch(() => this.createUnauthorized(CODE.NotFound));
+        const loggedUser = await this.user();
 
         const user = await DI.userRepository.findOneOrFail(
             { username: ctx.params.username }
@@ -74,9 +72,7 @@ export default class UserController extends AbstractController {
     }
 
     private async userUnsubscribe(ctx: Context) {
-        const loggedUser = await DI.userRepository.findOneOrFail(
-            { username: this.auth() }
-        ).catch(() => this.createUnauthorized(CODE.NotFound));
+        const loggedUser = await this.user();
 
         const user = await DI.userRepository.findOneOrFail(
             { username: ctx.params.username },

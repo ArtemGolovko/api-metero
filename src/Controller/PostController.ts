@@ -100,9 +100,7 @@ export default class PostController extends AbstractController {
     }
 
     private async likePost(ctx: Context) {
-        const loggedUser = await DI.userRepository.findOneOrFail(
-            { username: this.auth() }
-        ).catch(() => this.createUnauthorized(CODE.NotFound));
+        const loggedUser = await this.user();
 
         const post = await DI.postRepository.findOneOrFail(
             { id: ctx.params.id }
@@ -115,9 +113,7 @@ export default class PostController extends AbstractController {
     }
 
     private async unlikePost(ctx: Context) {
-        const loggedUser = await DI.userRepository.findOneOrFail(
-            { username: this.auth() }
-        ).catch(() => this.createUnauthorized(CODE.NotFound));
+        const loggedUser = await this.user();
 
         const post = await DI.postRepository.findOneOrFail(
             { id: ctx.params.id },
