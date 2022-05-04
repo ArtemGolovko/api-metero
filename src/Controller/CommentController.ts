@@ -75,7 +75,7 @@ export default class CommentController extends AbstractController {
         ctx.status = 200;
     }
 
-    public async likeComment(ctx: Context) {
+    private async likeComment(ctx: Context) {
         const loggedUser = await this.user();
         const comment = await DI.commentRepository.findOneOrFail(
             { id: ctx.params.id }
@@ -87,7 +87,7 @@ export default class CommentController extends AbstractController {
         ctx.status = 200;
     }
 
-    public async unlikeComment(ctx: Context) {
+    private async unlikeComment(ctx: Context) {
         const loggedUser = await this.user();
         const comment = await DI.commentRepository.findOneOrFail(
             { id: ctx.params.id },
@@ -100,6 +100,19 @@ export default class CommentController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async deleteComment(ctx: Context) {
+        const loggedUserUsername = this.auth();
+        const comment = await DI.commentRepository.findOneOrFail(
+            { id: ctx.params.id },
+            { populate: ['author'] }
+        ).catch(() => this.createNotFound('comment', ctx.params.id));
+
+        if (comment.author.username !== loggedUserUsername) throw new Forbidden();
+
+        await DI.em.removeAndFlush(comment);
+        ctx.status = 204;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
@@ -109,6 +122,7 @@ export default class CommentController extends AbstractController {
         router.put('/comment/:id', this.createMiddleware(this.updateComment));
         router.post('/comment/:id/like', this.createMiddleware(this.likeComment));
         router.post('/comment/:id/unlike', this.createMiddleware(this.unlikeComment));
+        router.delete('/comment/:id', this.createMiddleware(this.deleteComment));
 
         return router.routes();
     }
