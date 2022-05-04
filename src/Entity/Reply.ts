@@ -24,4 +24,7 @@ export default class Reply {
 
     @ManyToMany(() => User, 'repiesLiked', { owner: true })
     likes = new Collection<User>(this);
+
+    @Property({ persist: false })
+    likesCount?: number
 }

@@ -6,6 +6,28 @@ import type { TCreate } from '../Validator/Schema/ReplySchema';
 import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
 import BadRequest, { CODE } from "../Exception/BadRequest";
+import Reply from "../Entity/Reply";
+
+const format = (reply: Reply) => {
+    const output = {
+        id: reply.id,
+        text: reply.text,
+        author: {
+            username: reply.author.username,
+            name: reply.author.name
+        },
+        likes: reply.likesCount
+    };
+
+    if (reply.to === null) return output;
+
+    const replyTo = {
+        username: reply.to.username,
+        name: reply.to.name 
+    };
+
+    return { ...output, replyTo };
+}
 
 export default class ReplyController extends AbstractController {
     private async createReply(ctx: Context) {
@@ -33,10 +55,20 @@ export default class ReplyController extends AbstractController {
         ctx.status = 201;
     }
 
+    private async getReplies(ctx: Context) {
+        await DI.commentRepository.has(ctx.params.commentId);
+
+        const replies = await DI.replyRepository.findAllByCommentId(ctx.params.commentId);
+
+        ctx.body = replies.map(format);
+        ctx.status = 200;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
         router.post('/comment/:commentId/replies', this.createMiddleware(this.createReply));
+        router.get('/comment/:commentId/replies', this.createMiddleware(this.getReplies));
 
         return router.routes();
     }
