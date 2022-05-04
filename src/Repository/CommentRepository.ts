@@ -16,6 +16,20 @@ export default class CommentRepository extends EntityRepository<Comment> {
         ;
     }
 
+    public async has(id: number) {
+        const post = await this.createQueryBuilder('comment')
+            .select('comment.id')
+            .where({ id: id })
+            .getSingleResult();
+
+        if (post === null) throw new NotFound({
+            code: CODE.RosourceNotFound,
+            resource: 'comment',
+            id: id
+        });
+    }
+
+
     public async findAllByPostId(postId: number, limit = 10) {
         return await this.commentQuery()
             .where(
