@@ -90,6 +90,44 @@ export default class ReplyController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async likeReply(ctx: Context) {
+        const loggedUser = await this.user();
+        const reply = await DI.replyRepository.findOneOrFail(
+            { id: ctx.params.id }
+        ).catch(() => this.createNotFound('reply', ctx.params.id));
+
+        reply.likes.add(loggedUser);
+
+        await DI.em.flush();
+        ctx.status = 200;
+    }
+
+    private async unlikeReply(ctx: Context) {
+        const loggedUser = await this.user();
+        const reply = await DI.replyRepository.findOneOrFail(
+            { id: ctx.params.id },
+            { populate: ['likes'] }
+        ).catch(() => this.createNotFound('reply', ctx.params.id));
+
+        reply.likes.remove(loggedUser);
+
+        await DI.em.flush();
+        ctx.status = 200;
+    }
+
+    private async deleteReply(ctx: Context) {
+        const loggedUserUsername = this.auth();
+        const reply = await DI.replyRepository.findOneOrFail(
+            { id: ctx.params.id },
+            { populate: ['author'] }
+        ).catch(() => this.createNotFound('reply', ctx.params.id));
+
+        if (reply.author.username !== loggedUserUsername) throw new Forbidden();
+
+        await DI.commentRepository.removeAndFlush(reply);
+        ctx.status = 204;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
@@ -97,6 +135,9 @@ export default class ReplyController extends AbstractController {
         router.get('/comment/:commentId/replies', this.createMiddleware(this.getReplies));
         router.get('/reply/:id', this.createMiddleware(this.getReply));
         router.put('/reply/:id', this.createMiddleware(this.updateReply));
+        router.post('/reply/:id/like', this.createMiddleware(this.likeReply));
+        router.post('/reply/:id/unlike', this.createMiddleware(this.unlikeReply));
+        router.delete('/reply/:id', this.createMiddleware(this.deleteReply));
 
         return router.routes();
     }
