@@ -6,6 +6,17 @@ import type { TCreate } from "../Validator/Schema/CommentSchema";
 import { createSchema } from "../Validator/Schema/CommentSchema";
 import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
+import Comment from "../Entity/Comment";
+
+const format = (comment: Comment) => ({
+    id: comment.id,
+    text: comment.text,
+    author: {
+        username: comment.author.username,
+        name: comment.author.name
+    },
+    likes: comment.likesCount
+})
 
 export default class CommentController extends AbstractController {
 
@@ -34,16 +45,15 @@ export default class CommentController extends AbstractController {
         await DI.postRepository.has(ctx.params.postId);
 
         const comments = await DI.commentRepository.findAllByPostId(ctx.params.postId);
-        console.log(comments);
 
+        ctx.body = comments.map(format);
         ctx.status = 200;
     } 
 
     private async getCommnet(ctx: Context) {
         const comment = await DI.commentRepository.findOneWithJoins(ctx.params.id);
 
-        console.log(comment);
-
+        ctx.body = format(comment);
         ctx.status = 200;
     }
 
