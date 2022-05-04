@@ -1,9 +1,12 @@
-import { Collection, Entity, ManyToMany, ManyToOne, PrimaryKey, Property, types } from "@mikro-orm/core";
+import { Collection, Entity, EntityManagerType, ManyToMany, ManyToOne, PrimaryKey, Property, types } from "@mikro-orm/core";
+import ReplyRepository from "../Repository/ReplyRepository";
 import Comment from "./Comment";
 import User from "./User";
 
-@Entity()
+@Entity({ customRepository: () => ReplyRepository })
 export default class Reply {
+    [EntityManagerType]?: ReplyRepository
+
     @PrimaryKey({ type: types.integer, autoincrement: true })
     id!: number
 
