@@ -10,7 +10,6 @@ export default class CommentRepository extends EntityRepository<Comment> {
                 'likes.username as likesUsername',
                 'count(likes.username) as likesCount'
             ])
-            .leftJoinAndSelect('comment.post', 'post')
             .leftJoinAndSelect('comment.author', 'author')
             .leftJoin('comment.likes', 'likes')
             .groupBy('comment.id')

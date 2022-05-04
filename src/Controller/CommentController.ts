@@ -34,7 +34,7 @@ export default class CommentController extends AbstractController {
         await DI.postRepository.has(ctx.params.postId);
 
         const comments = await DI.commentRepository.findAllByPostId(ctx.params.postId);
-        // console.log(comments);
+        console.log(comments);
 
         ctx.status = 200;
     } 
