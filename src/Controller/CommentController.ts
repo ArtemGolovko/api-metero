@@ -2,11 +2,12 @@ import { Context } from "koa";
 import Router, { IMiddleware } from "koa-router";
 import { CODE } from "../Exception/Unauthorized";
 import { DI } from "../server";
-import type { TCreate } from "../Validator/Schema/CommentSchema";
+import { TCreate, TUpdate, updateSchema } from "../Validator/Schema/CommentSchema";
 import { createSchema } from "../Validator/Schema/CommentSchema";
 import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
 import Comment from "../Entity/Comment";
+import Forbidden from "../Exception/Forbidden";
 
 const format = (comment: Comment) => ({
     id: comment.id,
@@ -57,12 +58,30 @@ export default class CommentController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async updateComment(ctx: Context) {
+        const loggedUserUsername = this.auth();
+        const comment = await DI.commentRepository.findOneOrFail(
+            { id: ctx.params.id },
+            { populate: ['author'] }
+        ).catch(() => this.createNotFound('comment', ctx.params.id));
+
+        if (comment.author.username !== loggedUserUsername) throw new Forbidden();
+
+        const body = validate<TUpdate>(updateSchema, await this.json());
+
+        comment.text = body.text;
+
+        await DI.em.flush();
+        ctx.status = 200;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
         router.post('/post/:postId/comments', this.createMiddleware(this.createComment));
         router.get('/post/:postId/comments', this.createMiddleware(this.getComments));
         router.get('/comment/:id', this.createMiddleware(this.getCommnet));
+        router.put('/comment/:id', this.createMiddleware(this.updateComment));
 
         return router.routes();
     }

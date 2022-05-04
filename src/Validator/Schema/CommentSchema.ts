@@ -7,3 +7,7 @@ export type TCreate = {
 export const createSchema = Joi.object({
     text: Joi.string().required()
 });
+
+export type TUpdate = TCreate;
+
+export const updateSchema = createSchema;
