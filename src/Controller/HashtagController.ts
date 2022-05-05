@@ -18,11 +18,18 @@ export default class HashtagController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async getHashtag(ctx: Context) {
+        const hashtag = await DI.hashtagRepository.findOneWithJoins(ctx.params.id);
+
+        ctx.body = format(hashtag);
+        ctx.status = 200;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
         router.get('s', this.createMiddleware(this.getHashtags));
-
+        router.get('/:id', this.createMiddleware(this.getHashtag));
         return router.routes();
     }
 

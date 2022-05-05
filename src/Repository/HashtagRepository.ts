@@ -1,5 +1,6 @@
 import { EntityRepository } from "@mikro-orm/mysql"
 import Hashtag from "../Entity/Hashtag";
+import NotFound, { CODE } from "../Exception/NotFound";
 
 export default class HashtagRepository extends EntityRepository<Hashtag> {
     public async createMany(names: string[]) {
@@ -25,5 +26,19 @@ export default class HashtagRepository extends EntityRepository<Hashtag> {
             .limit(limit)
             .getResultList()
         ;
+    }
+
+    public async findOneWithJoins(id: number) {
+        const hashtag = await this.hashtagQuery()
+            .where({ id: id })
+            .getSingleResult();
+
+        if (hashtag === null) throw new NotFound({
+            code: CODE.RosourceNotFound,
+            resource: 'hashtag',
+            id: id
+        });
+
+        return hashtag;
     }
 }
