@@ -9,7 +9,7 @@ import AbstractController from "./AbstractController";
 import { CODE } from "../Exception/Unauthorized";
 import { format as postFormat } from './PostController';
 
-export const format = (user: User) => ({
+const format = (user: User) => ({
     username: user.username,
     name: user.name,
     avatar: user.avatar,
