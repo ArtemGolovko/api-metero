@@ -14,4 +14,7 @@ export default class Hashtag {
 
     @ManyToMany(() => Post, post => post.hashtags)
     associatedPosts = new Collection<Post>(this);
+
+    @Property({ persist: false })
+    associatedPostsCount?: number
 }
