@@ -72,24 +72,33 @@ export default class PostController extends AbstractController {
 
     private async updatePost(ctx: Context) {
         const loggedUserUsername = this.auth();
+
+        const body = validate<TUpdate>(updateSchema, await this.json());
+
+        const populate = ['author'];
+        if (body.profileMarks !== undefined) populate.push('markedUsers');
+        if (body.hashtags !== undefined) populate.push('hashtags');
+
         const post = await DI.postRepository.findOneOrFail(
             { id: ctx.params.id },
-            { populate: ['author'] }
+            { populate: populate as any }
         ).catch(() => this.createNotFound('post', ctx.params.id));
 
         if (post.author.username !== loggedUserUsername) throw new Forbidden();
-
-        const body = validate<TUpdate>(updateSchema, await this.json());
 
         post.updatedAt = new Date();
 
         if (body.text !== undefined) post.text = body.text;
 
-        if (body.hashtags !== undefined)
+        if (body.hashtags !== undefined) {
+            post.hashtags.removeAll();
             post.hashtags.set(await this.hashtags(body.hashtags));
+        }
 
-        if (body.profileMarks !== undefined)
+        if (body.profileMarks !== undefined) {
+            post.hashtags.removeAll();
             post.markedUsers.set(await this.markedUsers(body.profileMarks));
+        }
 
         if (body.images !== undefined) post.images = body.images;
 
