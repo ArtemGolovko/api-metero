@@ -52,11 +52,21 @@ export default class PostRepository extends EntityRepository<Post> {
         return post;
     }
 
-    public async findAllByAuthorUsername(username: string) {
+    public async findAllByAuthorUsername(username: string, limit = 10) {
         return await this.postQuery()
             .where(
                 { author: { username: username } }
             )
+            .limit(limit)
+            .getResultList();
+    }
+
+    public async findAllbyHashtagId(id: number, limit = 10) {
+        return await this.postQuery()
+            .where(
+                { comments: { id: id} }
+            )
+            .limit(limit)
             .getResultList();
     }
 }

@@ -2,6 +2,7 @@ import { Context } from "koa";
 import Router, { IMiddleware } from "koa-router";
 import Hashtag from "../Entity/Hashtag";
 import { DI } from "../server";
+import { format as postFormat } from './PostController';
 import AbstractController from "./AbstractController";
 
 const format = (hashtag: Hashtag) => ({
@@ -25,11 +26,22 @@ export default class HashtagController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async getHashtagPosts(ctx: Context) {
+        await DI.hashtagRepository.has(ctx.params.id);
+
+        const posts = await DI.postRepository.findAllbyHashtagId(ctx.params.id);
+
+        ctx.body = posts.map(postFormat);
+        ctx.status = 200;
+    }
+
     public routes(): IMiddleware<any, {}> {
         const router = new Router();
 
         router.get('s', this.createMiddleware(this.getHashtags));
         router.get('/:id', this.createMiddleware(this.getHashtag));
+        router.get('/:id/posts', this.createMiddleware(this.getHashtagPosts));
+
         return router.routes();
     }
 
