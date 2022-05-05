@@ -21,6 +21,19 @@ export default class HashtagRepository extends EntityRepository<Hashtag> {
         ;
     }
 
+    public async has(id: number) {
+        const hashtag = await this.createQueryBuilder('hashtag')
+            .select('hashtag.id')
+            .where({ id: id })
+            .getSingleResult();
+
+        if (hashtag === null) throw new NotFound({
+            code: CODE.RosourceNotFound,
+            resource: 'hashtag',
+            id: id
+        });
+    }
+
     public async findAllWithJoins(limit = 10) {
         return await this.hashtagQuery()
             .limit(limit)
