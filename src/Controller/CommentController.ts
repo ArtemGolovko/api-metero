@@ -1,6 +1,5 @@
 import { Context } from "koa";
 import Router, { IMiddleware } from "koa-router";
-import { CODE } from "../Exception/Unauthorized";
 import { DI } from "../server";
 import { TCreate, TUpdate, updateSchema } from "../Validator/Schema/CommentSchema";
 import { createSchema } from "../Validator/Schema/CommentSchema";
