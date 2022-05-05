@@ -7,7 +7,7 @@ import Router from './Controller/Router';
 import { httpLogger } from './logger';
 import handler from './Exception/HandleKoaErrors';
 
-import { CORSandCSP } from './Security/browserSecurity';
+import { CORS } from './Security/browserSecurity';
 import Koa, { Context, Next } from 'koa';
 
 type TKoaLoggerArgs = [string, string, string, number | undefined, string | undefined, string | undefined];
@@ -22,7 +22,7 @@ const use = (app: Koa) => {
     app.use(handler);
     app.use(Router.routes());
     app.use(Router.allowedMethods());
-    app.use(CORSandCSP);
+    app.use(CORS);
 }
 
 export default use;
