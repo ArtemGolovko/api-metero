@@ -6,7 +6,7 @@ export const CORSandCSP = async (ctx: Context, next: Next) => {
         'Access-Control-Allow-Methods': 'GET POST PUT DELETE OPTIONS HEAD',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Max-Age': '86400',
-        'Content-Security-Policy': 'default-src ' + ctx.request.header['origin'] ?? 'self'
+        'Content-Security-Policy': 'default-src ' + (ctx.request.header['origin'] ?? '*')
     });
     
     await next();

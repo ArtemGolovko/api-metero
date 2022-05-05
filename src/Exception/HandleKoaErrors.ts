@@ -8,6 +8,11 @@ import NotFound, { CODE } from "./NotFound";
 const handler = async (ctx: Context, next: Next) => {
     await next();
 
+    if (ctx.request.method.toLowerCase() === 'options') {
+        ctx.status = 200;
+        return;
+    }
+
     const ctxBody = ctx.body;
     if (ctxBody !== undefined) return;
 
