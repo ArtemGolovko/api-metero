@@ -7,12 +7,11 @@ export default class ReplyRepository extends EntityRepository<Reply> {
         return this.createQueryBuilder('reply')
             .select([
                 'reply.*',
-                'likes.username as likesUsername',
                 'count(likes.username) as likesCount'
             ])
             .leftJoinAndSelect('reply.author', 'author')
             .leftJoinAndSelect('reply.to', 'to')
-            .leftJoin('reply.likes', 'likes')
+            .leftJoinAndSelect('reply.likes', 'likes')
             .groupBy('reply.id')
         ;
     }

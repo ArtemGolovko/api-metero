@@ -8,8 +8,13 @@ import AbstractController from "./AbstractController";
 import BadRequest, { CODE } from "../Exception/BadRequest";
 import Reply from "../Entity/Reply";
 import Forbidden from "../Exception/Forbidden";
+import User from "../Entity/User";
 
-const format = (reply: Reply) => {
+const isLiked = (reply: Reply, user: User) => {
+    return reply.likes.contains(user);
+}
+
+const format = (reply: Reply, loggedUser?: User) => {
     const output = {
         id: reply.id,
         text: reply.text,
@@ -17,7 +22,8 @@ const format = (reply: Reply) => {
             username: reply.author.username,
             name: reply.author.name
         },
-        likes: reply.likesCount
+        likes: reply.likesCount,
+        isLiked: loggedUser !== undefined ? isLiked(reply, loggedUser) : undefined
     };
 
     if (reply.to === null) return output;
@@ -61,14 +67,18 @@ export default class ReplyController extends AbstractController {
 
         const replies = await DI.replyRepository.findAllByCommentId(ctx.params.commentId);
 
-        ctx.body = replies.map(format);
+        const loggedUser = await this.tryUser();
+
+        ctx.body = replies.map(reply => format(reply, loggedUser !== null ? loggedUser : undefined));
         ctx.status = 200;
     }
 
     private async getReply(ctx: Context) {
         const reply = await DI.replyRepository.fillOneWithJoins(ctx.params.id);
 
-        ctx.body = format(reply);
+        const loggedUser = await this.tryUser();
+
+        ctx.body = format(reply, loggedUser !== null ? loggedUser : undefined);
         ctx.status = 200;
     }
 
