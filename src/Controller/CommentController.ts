@@ -7,15 +7,21 @@ import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
 import Comment from "../Entity/Comment";
 import Forbidden from "../Exception/Forbidden";
+import User from "../Entity/User";
 
-const format = (comment: Comment) => ({
+const isLiked = (comment: Comment, user: User) => {
+    return comment.likes.contains(user);
+}
+
+const format = (comment: Comment, loggedUser?: User) => ({
     id: comment.id,
     text: comment.text,
     author: {
         username: comment.author.username,
         name: comment.author.name
     },
-    likes: comment.likesCount
+    likes: comment.likesCount,
+    isLiked: loggedUser !== undefined ? isLiked(comment, loggedUser) : undefined
 })
 
 export default class CommentController extends AbstractController {
@@ -44,14 +50,18 @@ export default class CommentController extends AbstractController {
 
         const comments = await DI.commentRepository.findAllByPostId(ctx.params.postId);
 
-        ctx.body = comments.map(format);
+        const loggedUser = await this.tryUser();
+
+        ctx.body = comments.map(comment => format(comment, loggedUser !== null ? loggedUser : undefined));
         ctx.status = 200;
     } 
 
     private async getCommnet(ctx: Context) {
         const comment = await DI.commentRepository.findOneWithJoins(ctx.params.id);
 
-        ctx.body = format(comment);
+        const loggedUser = await this.tryUser();
+
+        ctx.body = format(comment, loggedUser !== null ? loggedUser : undefined);
         ctx.status = 200;
     }
 

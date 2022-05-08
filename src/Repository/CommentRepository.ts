@@ -7,11 +7,10 @@ export default class CommentRepository extends EntityRepository<Comment> {
         return this.createQueryBuilder('comment')
             .select([
                 'comment.*',
-                'likes.username as likesUsername',
                 'count(likes.username) as likesCount'
             ])
             .leftJoinAndSelect('comment.author', 'author')
-            .leftJoin('comment.likes', 'likes')
+            .leftJoinAndSelect('comment.likes', 'likes')
             .groupBy('comment.id')
         ;
     }
