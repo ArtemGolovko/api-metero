@@ -7,7 +7,7 @@ export type TCreate = {
 
 export const createSchema = Joi.object({
     text: Joi.string().required(),
-    replyTo: Joi.string().max(255).pattern(/[a-zA-Z0-9_]+/).optional()
+    replyTo: Joi.string().max(255).pattern(/^[a-zA-Z0-9_]+$/).optional()
 });
 
 export type TUpdate = {
