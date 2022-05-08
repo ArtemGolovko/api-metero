@@ -18,11 +18,12 @@ const createDiff = (date: Date|null|undefined) => {
     return moment(date.getTime()).locale('ru').fromNow()
 }
 
-const isLiked = (post: Post, user: User) => {
+const isLiked = (post: Post, user: User|null) => {
+    if (user === null) return undefined;
     return post.likes.contains(user);
 }
 
-export const format = (post: Post, loggedUser?: User) => ({
+export const format = (post: Post, loggedUser: User|null = null) => ({
     id: post.id,
     author: {
         username: post.author.username,
@@ -37,7 +38,7 @@ export const format = (post: Post, loggedUser?: User) => ({
     profileMarks: post.markedUsers.getItems().map(user => user.username),
     images: post.images,
     likes: post.likesCount,
-    isLiked: loggedUser !== undefined ? isLiked(post, loggedUser) : undefined
+    isLiked: isLiked(post, loggedUser)
 })
 
 export default class PostController extends AbstractController {
@@ -66,7 +67,7 @@ export default class PostController extends AbstractController {
 
         const loggedUser = await this.tryUser();
 
-        ctx.body = posts.map(post => format(post, loggedUser !== null ? loggedUser : undefined));
+        ctx.body = posts.map(post => format(post, loggedUser));
         ctx.status = 200;
     }
 
@@ -75,7 +76,7 @@ export default class PostController extends AbstractController {
 
         const loggedUser = await this.tryUser();
 
-        ctx.body = format(post, loggedUser !== null ? loggedUser : undefined);
+        ctx.body = format(post, loggedUser);
         ctx.status = 200;
     }
 

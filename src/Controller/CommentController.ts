@@ -9,11 +9,12 @@ import Comment from "../Entity/Comment";
 import Forbidden from "../Exception/Forbidden";
 import User from "../Entity/User";
 
-const isLiked = (comment: Comment, user: User) => {
+const isLiked = (comment: Comment, user: User|null) => {
+    if (user === null) return undefined;
     return comment.likes.contains(user);
 }
 
-const format = (comment: Comment, loggedUser?: User) => ({
+const format = (comment: Comment, loggedUser: User|null = null) => ({
     id: comment.id,
     text: comment.text,
     author: {
@@ -21,7 +22,7 @@ const format = (comment: Comment, loggedUser?: User) => ({
         name: comment.author.name
     },
     likes: comment.likesCount,
-    isLiked: loggedUser !== undefined ? isLiked(comment, loggedUser) : undefined
+    isLiked: isLiked(comment, loggedUser)
 })
 
 export default class CommentController extends AbstractController {
@@ -52,7 +53,7 @@ export default class CommentController extends AbstractController {
 
         const loggedUser = await this.tryUser();
 
-        ctx.body = comments.map(comment => format(comment, loggedUser !== null ? loggedUser : undefined));
+        ctx.body = comments.map(comment => format(comment, loggedUser));
         ctx.status = 200;
     } 
 
@@ -61,7 +62,7 @@ export default class CommentController extends AbstractController {
 
         const loggedUser = await this.tryUser();
 
-        ctx.body = format(comment, loggedUser !== null ? loggedUser : undefined);
+        ctx.body = format(comment, loggedUser);
         ctx.status = 200;
     }
 

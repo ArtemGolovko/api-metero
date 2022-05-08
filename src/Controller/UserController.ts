@@ -107,7 +107,7 @@ export default class UserController extends AbstractController {
 
         const loggedUser = await this.tryUser();
 
-        ctx.body = posts.map(post => postFormat(post, loggedUser !== null ? loggedUser : undefined));
+        ctx.body = posts.map(post => postFormat(post, loggedUser));
         ctx.status = 200;
     }
 

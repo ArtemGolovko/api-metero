@@ -10,11 +10,12 @@ import Reply from "../Entity/Reply";
 import Forbidden from "../Exception/Forbidden";
 import User from "../Entity/User";
 
-const isLiked = (reply: Reply, user: User) => {
+const isLiked = (reply: Reply, user: User|null) => {
+    if (user === null) return undefined;
     return reply.likes.contains(user);
 }
 
-const format = (reply: Reply, loggedUser?: User) => {
+const format = (reply: Reply, loggedUser: User|null = null) => {
     const output = {
         id: reply.id,
         text: reply.text,
@@ -23,7 +24,7 @@ const format = (reply: Reply, loggedUser?: User) => {
             name: reply.author.name
         },
         likes: reply.likesCount,
-        isLiked: loggedUser !== undefined ? isLiked(reply, loggedUser) : undefined
+        isLiked: isLiked(reply, loggedUser)
     };
 
     if (reply.to === null) return output;
@@ -69,7 +70,7 @@ export default class ReplyController extends AbstractController {
 
         const loggedUser = await this.tryUser();
 
-        ctx.body = replies.map(reply => format(reply, loggedUser !== null ? loggedUser : undefined));
+        ctx.body = replies.map(reply => format(reply, loggedUser));
         ctx.status = 200;
     }
 
@@ -78,7 +79,7 @@ export default class ReplyController extends AbstractController {
 
         const loggedUser = await this.tryUser();
 
-        ctx.body = format(reply, loggedUser !== null ? loggedUser : undefined);
+        ctx.body = format(reply, loggedUser);
         ctx.status = 200;
     }
 
