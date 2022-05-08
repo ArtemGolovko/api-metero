@@ -15,7 +15,11 @@ const createDiff = (date: Date|null|undefined) => {
     if (date === undefined) return undefined;
     if (date === null) return undefined;
 
-    return moment(date.getTime()).locale('ru').fromNow()
+    const readableDate = moment(date.getTime()).locale('ru').fromNow();
+
+    if (readableDate === 'несколько секунд назад') return 'только что';
+
+    return readableDate;
 }
 
 const isLiked = (post: Post, user: User|null) => {
@@ -31,13 +35,13 @@ export const format = (post: Post, loggedUser: User|null = null) => ({
         avatar: post.author.avatar,
         verified: !!post.author.verified
     },
-    date: post.createdAt.getTime(),
-    dateDiff: createDiff(post.createdAt),
-    dateUpdated: post.updatedAt?.getTime(),
-    dateUpdatedDiff: createDiff(post.updatedAt),
+    unixDate: post.createdAt.getTime(),
+    readableDate: createDiff(post.createdAt),
+    unixDateUpdated: post.updatedAt?.getTime(),
+    readableDateUpdated: createDiff(post.updatedAt),
     text: post.text,
     hashtags: post.hashtags.getItems().map(hashtag => hashtag.name),
-    profileMarks: post.markedUsers.getItems().map(user => user.username),
+    mentions: post.markedUsers.getItems().map(user => user.username),
     images: post.images,
     likes: post.likesCount,
     isLiked: isLiked(post, loggedUser)
@@ -57,7 +61,7 @@ export default class PostController extends AbstractController {
 
         post.hashtags.set(await this.hashtags(body.hashtags));
 
-        post.markedUsers.set(await this.markedUsers(body.profileMarks));
+        post.markedUsers.set(await this.markedUsers(body.mentions));
 
         await DI.em.persistAndFlush(post);
 
@@ -88,7 +92,7 @@ export default class PostController extends AbstractController {
         const body = validate<TUpdate>(updateSchema, await this.json());
 
         const populate = ['author'];
-        if (body.profileMarks !== undefined) populate.push('markedUsers');
+        if (body.mentions !== undefined) populate.push('markedUsers');
         if (body.hashtags !== undefined) populate.push('hashtags');
 
         const post = await DI.postRepository.findOneOrFail(
@@ -107,9 +111,9 @@ export default class PostController extends AbstractController {
             post.hashtags.set(await this.hashtags(body.hashtags));
         }
 
-        if (body.profileMarks !== undefined) {
-            post.hashtags.removeAll();
-            post.markedUsers.set(await this.markedUsers(body.profileMarks));
+        if (body.mentions !== undefined) {
+            post.markedUsers.removeAll();
+            post.markedUsers.set(await this.markedUsers(body.mentions));
         }
 
         if (body.images !== undefined) post.images = body.images;
