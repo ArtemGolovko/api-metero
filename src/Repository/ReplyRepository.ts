@@ -17,7 +17,7 @@ export default class ReplyRepository extends EntityRepository<Reply> {
         ;
     }
 
-    public async findAllByCommentId(commentId: number, limit = 10) {
+    public async findAllByCommentId(commentId: number, limit = 100) {
         return await this.replyQuery()
             .where(
                 { comment: { id: commentId } }

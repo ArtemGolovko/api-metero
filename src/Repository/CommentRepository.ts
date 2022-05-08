@@ -30,7 +30,7 @@ export default class CommentRepository extends EntityRepository<Comment> {
     }
 
 
-    public async findAllByPostId(postId: number, limit = 10) {
+    public async findAllByPostId(postId: number, limit = 100) {
         return await this.commentQuery()
             .where(
                 { post: { id: postId } }

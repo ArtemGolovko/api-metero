@@ -32,7 +32,7 @@ export default class UserRepository extends EntityRepository<User> {
         });
     }
 
-    public async findAllWithJoins(limit = 10) {
+    public async findAllWithJoins(limit = 100) {
         return await this.userQuery()
             .limit(limit)
             .getResultList();

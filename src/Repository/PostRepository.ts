@@ -31,7 +31,7 @@ export default class PostRepository extends EntityRepository<Post> {
         });
     }
 
-    public async findAllWithJoins(limit = 10){
+    public async findAllWithJoins(limit = 100){
         return await this.postQuery()
             .limit(limit)
             .getResultList()
@@ -52,7 +52,7 @@ export default class PostRepository extends EntityRepository<Post> {
         return post;
     }
 
-    public async findAllByAuthorUsername(username: string, limit = 10) {
+    public async findAllByAuthorUsername(username: string, limit = 100) {
         return await this.postQuery()
             .where(
                 { author: { username: username } }
@@ -61,7 +61,7 @@ export default class PostRepository extends EntityRepository<Post> {
             .getResultList();
     }
 
-    public async findAllbyHashtagId(id: number, limit = 10) {
+    public async findAllbyHashtagId(id: number, limit = 100) {
         return await this.postQuery()
             .where(
                 { comments: { id: id} }

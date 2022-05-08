@@ -34,7 +34,7 @@ export default class HashtagRepository extends EntityRepository<Hashtag> {
         });
     }
 
-    public async findAllWithJoins(limit = 10) {
+    public async findAllWithJoins(limit = 100) {
         return await this.hashtagQuery()
             .limit(limit)
             .getResultList()
