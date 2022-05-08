@@ -8,12 +8,11 @@ export default class UserRepository extends EntityRepository<User> {
         return this.createQueryBuilder('user')
             .select([
                 'user.*',
-                'subscribers.username as subscribersUsername',
                 'subscribed.username as subscribedUsername',
                 'count(subscribers.username) as subscribersCount',
                 'count(subscribed.username) as subscribedCount'
             ])
-            .leftJoin('user.subscribers', 'subscribers')
+            .leftJoinAndSelect('user.subscribers', 'subscribers')
             .leftJoin('user.subscribed', 'subscribed')
             .groupBy('user.username')
         ;

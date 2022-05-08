@@ -6,17 +6,23 @@ import { createSchema, updateSchema } from "../Validator/Schema/UserSchema";
 import type { TCreate, TUpdate } from "../Validator/Schema/UserSchema";
 import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
-import { CODE } from "../Exception/Unauthorized";
 import { format as postFormat } from './PostController';
 
-const format = (user: User) => ({
+const isSubscribed = (user: User, loggedUser: User|null) => {
+    if (loggedUser == null) return undefined;
+    if (loggedUser.username === user.username) return undefined;
+    return user.subscribers.contains(loggedUser);
+}
+
+const format = (user: User, loggedUser: User|null = null) => ({
     username: user.username,
     name: user.name,
     avatar: user.avatar,
     profileBanner: user.profileBanner,
     isPrivate: user.isPrivate,
     subscribers: user.subscribersCount,
-    subs: user.subscribedCount
+    subs: user.subscribedCount,
+    isSubscribed: isSubscribed(user, loggedUser)
 });
 
 export default class UserController extends AbstractController {
@@ -39,15 +45,19 @@ export default class UserController extends AbstractController {
     private async getUsers(ctx: Context) {
         const users = await DI.userRepository.findAllWithJoins();
 
+        const loggedUser = await this.tryUser();
+
         ctx.status = 200;
-        ctx.body = users.map(format);
+        ctx.body = users.map(user => format(user, loggedUser));
     }
 
     private async getUser(ctx: Context) {
         const user = await DI.userRepository.findOneWithJoins(ctx.params.username);
 
+        const loggedUser = await this.tryUser();
+
         ctx.status = 200;
-        ctx.body = format(user);
+        ctx.body = format(user, loggedUser);
     }
 
     private async updateUser(ctx: Context) {
