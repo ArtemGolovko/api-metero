@@ -1,6 +1,5 @@
 import { Context } from "koa";
 import Router, { IMiddleware } from "koa-router";
-import { CODE } from "../Exception/Unauthorized";
 import { DI } from "../server";
 import validate from "../Validator/Validate";
 import { createSchema, updateSchema } from "../Validator/Schema/PostSchema";
@@ -10,6 +9,7 @@ import Hashtag from "../Entity/Hashtag";
 import Post from "../Entity/Post";
 import Forbidden from "../Exception/Forbidden";
 import moment from "moment";
+import User from "../Entity/User";
 
 const createDiff = (date: Date|null|undefined) => {
     if (date === undefined) return undefined;
@@ -18,7 +18,11 @@ const createDiff = (date: Date|null|undefined) => {
     return moment(date.getTime()).locale('ru').fromNow()
 }
 
-export const format = (post: Post) => ({
+const isLiked = (post: Post, user: User) => {
+    return post.likes.contains(user);
+}
+
+export const format = (post: Post, loggedUser?: User) => ({
     id: post.id,
     author: {
         username: post.author.username,
@@ -32,7 +36,8 @@ export const format = (post: Post) => ({
     hashtags: post.hashtags.getItems().map(hashtag => hashtag.name),
     profileMarks: post.markedUsers.getItems().map(user => user.username),
     images: post.images,
-    likes: post.likesCount
+    likes: post.likesCount,
+    isLiked: loggedUser !== undefined ? isLiked(post, loggedUser) : undefined
 })
 
 export default class PostController extends AbstractController {
@@ -59,14 +64,18 @@ export default class PostController extends AbstractController {
     private async getPosts(ctx: Context) {
         const posts = await DI.postRepository.findAllWithJoins();
 
-        ctx.body = posts.map(format);
+        const loggedUser = await this.tryUser();
+
+        ctx.body = posts.map(post => format(post, loggedUser !== null ? loggedUser : undefined));
         ctx.status = 200;
     }
 
     private async getPost(ctx: Context) {
         const post = await DI.postRepository.findOneWithJoins(ctx.params.id);
 
-        ctx.body = format(post);
+        const loggedUser = await this.tryUser();
+
+        ctx.body = format(post, loggedUser !== null ? loggedUser : undefined);
         ctx.status = 200;
     }
 

@@ -31,7 +31,9 @@ export default class HashtagController extends AbstractController {
 
         const posts = await DI.postRepository.findAllbyHashtagId(ctx.params.id);
 
-        ctx.body = posts.map(postFormat);
+        const loggedUser = await this.tryUser();
+
+        ctx.body = posts.map(post => postFormat(post, loggedUser !== null ? loggedUser : undefined));
         ctx.status = 200;
     }
 

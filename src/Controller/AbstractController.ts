@@ -70,6 +70,14 @@ export default abstract class AbstractController {
         throw new Unauthorized({ code });
     }
 
+    protected async tryUser(): Promise<User|null> {
+        try {
+            return await this.user();
+        } catch (error) {
+            return null;
+        }
+    }
+
     public prefix(): string {
         return '/';
     }

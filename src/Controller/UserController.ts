@@ -95,7 +95,9 @@ export default class UserController extends AbstractController {
 
         const posts = await DI.postRepository.findAllByAuthorUsername(ctx.params.username);
 
-        ctx.body = posts.map(postFormat);
+        const loggedUser = await this.tryUser();
+
+        ctx.body = posts.map(post => postFormat(post, loggedUser !== null ? loggedUser : undefined));
         ctx.status = 200;
     }
 

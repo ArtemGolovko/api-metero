@@ -7,13 +7,12 @@ export default class PostRepository extends EntityRepository<Post> {
         return this.createQueryBuilder('post')
             .select([
                 'post.*',
-                'likes.username as likesUsername',
                 'count(likes.username) as likesCount'
             ])
             .leftJoinAndSelect('post.author', 'author')
             .leftJoinAndSelect('post.hashtags', 'hashtags')
             .leftJoinAndSelect('post.markedUsers', 'markedUsers')
-            .leftJoin('post.likes', 'likes')
+            .leftJoinAndSelect('post.likes', 'likes')
             .groupBy('post.id')
         ;
     }
