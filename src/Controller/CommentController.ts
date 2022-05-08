@@ -19,7 +19,8 @@ const format = (comment: Comment, loggedUser: User|null = null) => ({
     text: comment.text,
     author: {
         username: comment.author.username,
-        name: comment.author.name
+        name: comment.author.name,
+        avatar: comment.author.avatar
     },
     likes: comment.likesCount,
     isLiked: isLiked(comment, loggedUser)

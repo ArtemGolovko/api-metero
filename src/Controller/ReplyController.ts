@@ -21,7 +21,8 @@ const format = (reply: Reply, loggedUser: User|null = null) => {
         text: reply.text,
         author: {
             username: reply.author.username,
-            name: reply.author.name
+            name: reply.author.name,
+            avatar: reply.author.avatar
         },
         likes: reply.likesCount,
         isLiked: isLiked(reply, loggedUser)

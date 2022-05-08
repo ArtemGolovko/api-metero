@@ -27,7 +27,8 @@ export const format = (post: Post, loggedUser: User|null = null) => ({
     id: post.id,
     author: {
         username: post.author.username,
-        name: post.author.name
+        name: post.author.name,
+        avatar: post.author.avatar
     },
     date: post.createdAt.getTime(),
     dateDiff: createDiff(post.createdAt),
