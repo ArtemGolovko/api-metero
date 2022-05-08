@@ -20,8 +20,14 @@ export default class User {
     @Property({ type: types.string })
     profileBanner!: string
 
+    @Property({ type: types.text })
+    description!: string
+
     @Property({ type: types.boolean, default: false })
     isPrivate!: boolean
+
+    @Property({ type: types.boolean, default: false })
+    verified!: boolean
 
     @ManyToMany(() => User, 'subscribed', { owner: true })
     subscribers = new Collection<User>(this);

@@ -19,7 +19,9 @@ const format = (user: User, loggedUser: User|null = null) => ({
     name: user.name,
     avatar: user.avatar,
     profileBanner: user.profileBanner,
-    isPrivate: user.isPrivate,
+    description: user.description,
+    isPrivate: !!user.isPrivate,
+    verified: !!user.verified,
     subscribers: user.subscribersCount,
     subs: user.subscribedCount,
     isSubscribed: isSubscribed(user, loggedUser)
@@ -34,7 +36,9 @@ export default class UserController extends AbstractController {
             name: body.name,
             profileBanner: body.profileBanner,
             avatar: body.avatar,
-            isPrivate: body.isPrivate
+            isPrivate: body.isPrivate,
+            description: body.description,
+            verified: false
         });
 
         await DI.em.persistAndFlush(user);
