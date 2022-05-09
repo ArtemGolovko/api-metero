@@ -24,6 +24,14 @@ const createDiff = (date: Date|null|undefined) => {
 
 const isLiked = (post: Post, user: User|null) => {
     if (user === null) return undefined;
+
+    DI.logger.debug(
+        'Debug IsLikes. Post: ' +
+        JSON.stringify(post) + '. Logged user: ' +
+        JSON.stringify(user) + '. Post likes: ' +
+        JSON.stringify(post.likes.getIdentifiers())
+    );
+
     return post.likes.contains(user);
 }
 

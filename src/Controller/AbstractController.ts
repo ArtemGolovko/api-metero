@@ -71,11 +71,14 @@ export default abstract class AbstractController {
     }
 
     protected async tryUser(): Promise<User|null> {
+        let username = null;
         try {
-            return await this.user();
+            username = this.auth();
         } catch (error) {
             return null;
         }
+
+        return await this.user();
     }
 
     public prefix(): string {

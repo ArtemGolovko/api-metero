@@ -11,6 +11,14 @@ import { format as postFormat } from './PostController';
 const isSubscribed = (user: User, loggedUser: User|null) => {
     if (loggedUser == null) return undefined;
     if (loggedUser.username === user.username) return undefined;
+
+    DI.logger.debug(
+        'Debug isSubscribed. User: ' +
+        JSON.stringify(user) + '. Logged user: ' +
+        JSON.stringify(loggedUser) + '. User subscribers' +
+        JSON.stringify(user.subscribers.getIdentifiers())
+    );
+
     return user.subscribers.contains(loggedUser);
 }
 

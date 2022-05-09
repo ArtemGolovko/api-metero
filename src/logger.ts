@@ -40,7 +40,7 @@ export const databaseLogger = winston.createLogger({
 });
 
 export const defaultLogger = winston.createLogger({
-    level: 'info',
+    level: 'debug',
     format: dafaultFormat,
     transports: [
         new winston.transports.File({ filename: `${__dirname}/../log/default.log`}),
