@@ -5,7 +5,7 @@ import { RequestContext } from '@mikro-orm/core';
 
 import Router from './Controller/Router';
 import { httpLogger } from './logger';
-import handler from './Exception/HandleKoaErrors';
+import handler from './Exception/HandleErrorMiddleware';
 
 import { CORS } from './Security/browserSecurity';
 import Koa, { Context, Next } from 'koa';

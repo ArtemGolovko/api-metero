@@ -1,7 +1,6 @@
 import { Context, Middleware, Next } from "koa";
 import Router from "koa-router";
 import parser from "co-body";
-import handleException from "../Exception/HandleException";
 import Unauthorized, { CODE } from "../Exception/Unauthorized";
 import NotFound, { CODE as NotFoundCODE } from "../Exception/NotFound";
 import BadRequest, { CODE as BadRequestCODE} from "../Exception/BadRequest";
@@ -17,14 +16,7 @@ export default abstract class AbstractController {
 
         return (async function(this: TThis, ctx: Context, next: Next) {
             this.context = ctx;
-            try {
-                await middleware.call(this, ctx);
-            } catch(error) {
-                const { status, body, headers } = handleException(error);
-                ctx.status = status;
-                ctx.body = body;
-                if (headers !== null) ctx.set(headers);
-            }
+            await middleware.call(this, ctx);
             await next();
         }).bind(this);
     }
@@ -71,9 +63,8 @@ export default abstract class AbstractController {
     }
 
     protected async tryUser(): Promise<User|null> {
-        let username = null;
         try {
-            username = this.auth();
+            this.auth();
         } catch (error) {
             return null;
         }
