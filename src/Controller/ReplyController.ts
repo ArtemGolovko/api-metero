@@ -9,6 +9,7 @@ import BadRequest, { CODE } from "../Exception/BadRequest";
 import Reply from "../Entity/Reply";
 import Forbidden from "../Exception/Forbidden";
 import User from "../Entity/User";
+import Conflict, { CODE as ConflictCODE } from "../Exception/Conflict";
 
 const isLiked = (reply: Reply, user: User|null) => {
     if (user === null) return undefined;
@@ -106,8 +107,12 @@ export default class ReplyController extends AbstractController {
     private async likeReply(ctx: Context) {
         const loggedUser = await this.user();
         const reply = await DI.replyRepository.findOneOrFail(
-            { id: ctx.params.id }
+            { id: ctx.params.id },
+            { populate: ['likes'] }
         ).catch(() => this.createNotFound('reply', ctx.params.id));
+
+        if (reply.likes.contains(loggedUser))
+            throw new Conflict({ code: ConflictCODE.AlreadyLiked });
 
         reply.likes.add(loggedUser);
 
@@ -121,6 +126,9 @@ export default class ReplyController extends AbstractController {
             { id: ctx.params.id },
             { populate: ['likes'] }
         ).catch(() => this.createNotFound('reply', ctx.params.id));
+
+        if (!reply.likes.contains(loggedUser))
+            throw new Conflict({ code: ConflictCODE.AlreadyLiked });
 
         reply.likes.remove(loggedUser);
 

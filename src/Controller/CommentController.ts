@@ -8,6 +8,7 @@ import AbstractController from "./AbstractController";
 import Comment from "../Entity/Comment";
 import Forbidden from "../Exception/Forbidden";
 import User from "../Entity/User";
+import Conflict, { CODE } from "../Exception/Conflict";
 
 const isLiked = (comment: Comment, user: User|null) => {
     if (user === null) return undefined;
@@ -88,8 +89,12 @@ export default class CommentController extends AbstractController {
     private async likeComment(ctx: Context) {
         const loggedUser = await this.user();
         const comment = await DI.commentRepository.findOneOrFail(
-            { id: ctx.params.id }
+            { id: ctx.params.id },
+            { populate: ['likes']}
         ).catch(() => this.createNotFound('comment', ctx.params.id));
+
+        if (comment.likes.contains(loggedUser))
+            throw new Conflict({ code: CODE.AlreadyLiked });
 
         comment.likes.add(loggedUser);
 
@@ -103,6 +108,9 @@ export default class CommentController extends AbstractController {
             { id: ctx.params.id },
             { populate: ['likes'] }
         ).catch(() => this.createNotFound('comment', ctx.params.id));
+
+        if (!comment.likes.contains(loggedUser))
+            throw new Conflict({ code: CODE.AlreadyUnliked });
 
         comment.likes.remove(loggedUser);
 

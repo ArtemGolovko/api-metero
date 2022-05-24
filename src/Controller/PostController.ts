@@ -10,6 +10,7 @@ import Post from "../Entity/Post";
 import Forbidden from "../Exception/Forbidden";
 import moment from "moment";
 import User from "../Entity/User";
+import Conflict, { CODE } from "../Exception/Conflict";
 
 const createDiff = (date: Date|null|undefined) => {
     if (date === undefined) return undefined;
@@ -134,8 +135,12 @@ export default class PostController extends AbstractController {
         const loggedUser = await this.user();
 
         const post = await DI.postRepository.findOneOrFail(
-            { id: ctx.params.id }
+            { id: ctx.params.id },
+            { populate: ['likes'] }
         ).catch(() => this.createNotFound('post', ctx.params.id));
+
+        if (post.likes.contains(loggedUser))
+            throw new Conflict({ code: CODE.AlreadyLiked });
 
         post.likes.add(loggedUser);
 
@@ -150,6 +155,9 @@ export default class PostController extends AbstractController {
             { id: ctx.params.id },
             { populate: ['likes'] }
         ).catch(() => this.createNotFound('post', ctx.params.id));
+
+        if (!post.likes.contains(loggedUser))
+            throw new Conflict({ code: CODE.AlreadyUnliked });
 
         post.likes.remove(loggedUser);
 
