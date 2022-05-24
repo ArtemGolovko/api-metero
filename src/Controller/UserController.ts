@@ -7,6 +7,7 @@ import type { TCreate, TUpdate } from "../Validator/Schema/UserSchema";
 import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
 import { format as postFormat } from './PostController';
+import Conflict, { CODE } from "../Exception/Conflict";
 
 const isSubscribed = (user: User, loggedUser: User|null) => {
     if (loggedUser == null) return undefined;
@@ -84,8 +85,15 @@ export default class UserController extends AbstractController {
         const loggedUser = await this.user();
 
         const user = await DI.userRepository.findOneOrFail(
-            { username: ctx.params.username }
+            { username: ctx.params.username },
+            { populate: ['subscribers'] }
         ).catch(() => this.createNotFound('user', ctx.params.username));
+
+        if (user.username === loggedUser.username)
+            throw new Conflict({ code: CODE.CannotSubscribe });
+
+        if (user.subscribers.contains(loggedUser))
+            throw new Conflict({ code: CODE.AlreadySubscribed });
 
         user.subscribers.add(loggedUser);
 
@@ -100,6 +108,12 @@ export default class UserController extends AbstractController {
             { username: ctx.params.username },
             { populate: ['subscribers'] }
         ).catch(() => this.createNotFound('user', ctx.params.username));
+
+        if (user.username === loggedUser.username)
+            throw new Conflict({ code: CODE.CannotUnsubscribe });
+
+        if (!user.subscribers.contains(loggedUser))
+            throw new Conflict({ code: CODE.AlreadyUnsubscribed });
 
         user.subscribers.remove(loggedUser);
 

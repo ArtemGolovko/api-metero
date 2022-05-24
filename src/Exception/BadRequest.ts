@@ -30,7 +30,6 @@ export default class BadRequest extends AbstractException {
             case CODE.InvaildBody: {
                 const ending = (this.context.message !== undefined)
                     ? '. ' + this.context.message : '';
-                console.log(ending);
                 return 'Body parsing error occured' + ending;
             }
         }
