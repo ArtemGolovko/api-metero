@@ -20,9 +20,9 @@ const use = (app: Koa) => {
         )
     );
     app.use(handler);
+    app.use(CORS);
     app.use(Router.routes());
     app.use(Router.allowedMethods());
-    app.use(CORS);
 }
 
 export default use;
