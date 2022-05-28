@@ -52,7 +52,9 @@ export default class ReplyController extends AbstractController {
         const reply = DI.replyRepository.create({
             text: body.text,
             author: loggedUser,
-            comment: comment
+            comment: comment,
+            to: null,
+            likesCount: 0
         });
 
         if (body.replyTo !== undefined) {
@@ -64,6 +66,7 @@ export default class ReplyController extends AbstractController {
 
         await DI.em.persistAndFlush(reply);
         ctx.status = 201;
+        ctx.body = format(reply, loggedUser);
     }
 
     private async getReplies(ctx: Context) {
@@ -78,7 +81,7 @@ export default class ReplyController extends AbstractController {
     }
 
     private async getReply(ctx: Context) {
-        const reply = await DI.replyRepository.fillOneWithJoins(ctx.params.id);
+        const reply = await DI.replyRepository.findOneWithJoins(ctx.params.id);
 
         const loggedUser = await this.tryUser();
 
@@ -87,14 +90,11 @@ export default class ReplyController extends AbstractController {
     }
 
     private async updateReply(ctx: Context) {
-        const loggedUserUsername = this.auth();
+        const loggedUser = await this.user();
 
-        const reply = await DI.replyRepository.findOneOrFail(
-            { id: ctx.params.id },
-            { populate: ['author'] }
-        ).catch(() => this.createNotFound('reply', ctx.params.id));
+        const reply = await DI.replyRepository.findOneWithJoins(ctx.params.id);
 
-        if (reply.author.username !== loggedUserUsername) throw new Forbidden();
+        if (reply.author.username !== loggedUser.username) throw new Forbidden();
 
         const body = validate<TUpdate>(updateSchema, await this.json());
 
@@ -102,6 +102,7 @@ export default class ReplyController extends AbstractController {
         
         await DI.em.flush();
         ctx.status = 200;
+        ctx.body = format(reply, loggedUser);
     }
 
     private async likeReply(ctx: Context) {
@@ -118,6 +119,10 @@ export default class ReplyController extends AbstractController {
 
         await DI.em.flush();
         ctx.status = 200;
+        ctx.body = {
+            likes: reply.likes.count(),
+            isLiked: isLiked(reply, loggedUser)
+        }
     }
 
     private async unlikeReply(ctx: Context) {
@@ -134,6 +139,10 @@ export default class ReplyController extends AbstractController {
 
         await DI.em.flush();
         ctx.status = 200;
+        ctx.body = {
+            likes: reply.likes.count(),
+            isLiked: isLiked(reply, loggedUser)
+        }
     }
 
     private async deleteReply(ctx: Context) {

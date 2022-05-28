@@ -25,7 +25,7 @@ export default class ReplyRepository extends EntityRepository<Reply> {
             .getResultList();
     }
 
-    public async fillOneWithJoins(id: number) {
+    public async findOneWithJoins(id: number) {
         const reply = await this.replyQuery()
             .where({ id: id })
             .getSingleResult();
