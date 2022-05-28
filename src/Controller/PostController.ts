@@ -65,7 +65,8 @@ export default class PostController extends AbstractController {
             author: user,
             createdAt: new Date(),
             images: body.images,
-            text: body.text
+            text: body.text,
+            likesCount: 0
         })
 
         post.hashtags.set(await this.hashtags(body.hashtags));
@@ -75,6 +76,7 @@ export default class PostController extends AbstractController {
         await DI.em.persistAndFlush(post);
 
         ctx.status = 201;
+        ctx.body = format(post, user);
     }
 
     private async getPosts(ctx: Context) {
@@ -96,20 +98,13 @@ export default class PostController extends AbstractController {
     }
 
     private async updatePost(ctx: Context) {
-        const loggedUserUsername = this.auth();
+        const loggedUser = await this.user();
 
         const body = validate<TUpdate>(updateSchema, await this.json());
 
-        const populate = ['author'];
-        if (body.mentions !== undefined) populate.push('markedUsers');
-        if (body.hashtags !== undefined) populate.push('hashtags');
+        const post = await DI.postRepository.findOneWithJoins(ctx.params.id);
 
-        const post = await DI.postRepository.findOneOrFail(
-            { id: ctx.params.id },
-            { populate: populate as any }
-        ).catch(() => this.createNotFound('post', ctx.params.id));
-
-        if (post.author.username !== loggedUserUsername) throw new Forbidden();
+        if (post.author.username !== loggedUser.username) throw new Forbidden();
 
         post.updatedAt = new Date();
 
@@ -129,6 +124,7 @@ export default class PostController extends AbstractController {
 
         await DI.em.flush();
         ctx.status = 200;
+        ctx.body = format(post, loggedUser);
     }
 
     private async likePost(ctx: Context) {
@@ -146,6 +142,10 @@ export default class PostController extends AbstractController {
 
         await DI.em.flush();
         ctx.status = 200;
+        ctx.body = {
+            likes: post.likes.count(),
+            isLiked: isLiked(post, loggedUser)
+        }
     }
 
     private async unlikePost(ctx: Context) {
@@ -163,6 +163,10 @@ export default class PostController extends AbstractController {
 
         await DI.em.flush();
         ctx.status = 200;
+        ctx.body = {
+            likes: post.likes.count(),
+            isLiked: isLiked(post, loggedUser)
+        }
     }
 
     private async deletePost(ctx: Context) {
