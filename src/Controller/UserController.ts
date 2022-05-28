@@ -53,6 +53,7 @@ export default class UserController extends AbstractController {
         await DI.em.persistAndFlush(user);
 
         ctx.status = 201;
+        ctx.body = format(user);
     }
 
     private async getUsers(ctx: Context) {
