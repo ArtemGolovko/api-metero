@@ -51,6 +51,24 @@ export default class UserRepository extends EntityRepository<User> {
         return user;
     }
 
+    public async findAllBySubscribedUsername(username: string, limit = 100) {
+        return this.userQuery()
+            .where({
+                subscribed: { username }
+            })
+            .limit(limit)
+            .getResultList();
+    }
+
+    public async findAllBySubscribersUsername(username: string, limit = 100) {
+        return this.userQuery()
+            .where({
+                subscribers: { username }
+            })
+            .limit(limit)
+            .getResultList();
+    }
+
     public async update(username: string, partial: EntityData<User>) {
         const result = await this.createQueryBuilder()
             .update(partial)

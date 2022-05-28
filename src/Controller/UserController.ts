@@ -137,6 +137,26 @@ export default class UserController extends AbstractController {
         ctx.status = 200;
     }
 
+    private async getUserSubscribers(ctx: Context) {
+        await DI.userRepository.has(ctx.params.username);
+
+        const users = await DI.userRepository.findAllBySubscribedUsername(ctx.params.username);
+
+        const loggedUser = await this.tryUser();
+        ctx.body = users.map(user => format(user, loggedUser));
+        ctx.status = 200;
+    }
+
+    private async getUserSubscribed(ctx: Context) {
+        await DI.userRepository.has(ctx.params.username);
+
+        const users = await DI.userRepository.findAllBySubscribersUsername(ctx.params.username);
+
+        const loggedUser = await this.tryUser();
+        ctx.body = users.map(user => format(user, loggedUser));
+        ctx.status = 200;
+    }
+
     public routes(): Router.IMiddleware<any, {}> {
         const router = new Router();
 
@@ -148,6 +168,8 @@ export default class UserController extends AbstractController {
         router.post('/:username/unsubscribe', this.createMiddleware(this.userUnsubscribe));
         router.delete('/:username', this.createMiddleware(this.deleteUser));
         router.get('/:username/posts', this.createMiddleware(this.getPosts));
+        router.get('/:username/subscribers', this.createMiddleware(this.getUserSubscribers));
+        router.get('/:username/subs', this.createMiddleware(this.getUserSubscribed));
 
         return router.routes();
     }
