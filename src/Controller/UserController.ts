@@ -104,8 +104,12 @@ export default class UserController extends AbstractController {
 
         user.subscribers.add(loggedUser);
 
-        await DI.userRepository.persistAndFlush(user);
+        await DI.userRepository.flush();
         ctx.status = 200;
+        ctx.body = {
+            subscribers: user.subscribers.count(),
+            isSubscribed: isSubscribed(user, loggedUser),
+        };
     }
 
     private async userUnsubscribe(ctx: Context) {
@@ -124,8 +128,12 @@ export default class UserController extends AbstractController {
 
         user.subscribers.remove(loggedUser);
 
-        await DI.userRepository.persistAndFlush(user);
+        await DI.userRepository.flush();
         ctx.status = 200;
+        ctx.body = {
+            subscribers: user.subscribers.count(),
+            isSubscribed: isSubscribed(user, loggedUser),
+        };
     }
 
     private async deleteUser(ctx: Context) {
