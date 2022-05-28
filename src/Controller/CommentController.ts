@@ -42,11 +42,13 @@ export default class CommentController extends AbstractController {
         const comment = DI.commentRepository.create({
             author: loggedUser,
             text: body.text,
-            post: post
+            post: post,
+            likesCount: 0
         });
 
         await DI.em.persistAndFlush(comment);
         ctx.status = 201;
+        ctx.body = format(comment, loggedUser)
     }
 
     private async getComments(ctx: Context) {
@@ -70,13 +72,10 @@ export default class CommentController extends AbstractController {
     }
 
     private async updateComment(ctx: Context) {
-        const loggedUserUsername = this.auth();
-        const comment = await DI.commentRepository.findOneOrFail(
-            { id: ctx.params.id },
-            { populate: ['author'] }
-        ).catch(() => this.createNotFound('comment', ctx.params.id));
+        const loggedUser = await this.user();
+        const comment = await DI.commentRepository.findOneWithJoins(ctx.params.id);
 
-        if (comment.author.username !== loggedUserUsername) throw new Forbidden();
+        if (comment.author.username !== loggedUser.username) throw new Forbidden();
 
         const body = validate<TUpdate>(updateSchema, await this.json());
 
@@ -84,6 +83,7 @@ export default class CommentController extends AbstractController {
 
         await DI.em.flush();
         ctx.status = 200;
+        ctx.body = format(comment, loggedUser)
     }
 
     private async likeComment(ctx: Context) {
@@ -100,6 +100,10 @@ export default class CommentController extends AbstractController {
 
         await DI.em.flush();
         ctx.status = 200;
+        ctx.body = {
+            likes: comment.likes.count(),
+            isLiked: isLiked(comment, loggedUser)
+        }
     }
 
     private async unlikeComment(ctx: Context) {
@@ -116,6 +120,10 @@ export default class CommentController extends AbstractController {
 
         await DI.em.flush();
         ctx.status = 200;
+        ctx.body = {
+            likes: comment.likes.count(),
+            isLiked: isLiked(comment, loggedUser)
+        }
     }
 
     private async deleteComment(ctx: Context) {
