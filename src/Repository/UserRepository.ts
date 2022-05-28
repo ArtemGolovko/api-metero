@@ -69,19 +69,6 @@ export default class UserRepository extends EntityRepository<User> {
             .getResultList();
     }
 
-    public async update(username: string, partial: EntityData<User>) {
-        const result = await this.createQueryBuilder()
-            .update(partial)
-            .where({ username: username })
-            .execute();
-        
-        if (result.affectedRows === 0) throw new NotFound({
-            code: CODE.RosourceNotFound,
-            resource: 'user',
-            id: username
-        });
-    }
-
     public async delete(username: string) {
         const result = await this.createQueryBuilder()
             .delete()

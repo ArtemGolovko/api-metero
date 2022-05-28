@@ -8,6 +8,7 @@ import validate from "../Validator/Validate";
 import AbstractController from "./AbstractController";
 import { format as postFormat } from './PostController';
 import Conflict, { CODE } from "../Exception/Conflict";
+import { wrap } from "@mikro-orm/core";
 
 const isSubscribed = (user: User, loggedUser: User|null) => {
     if (loggedUser == null) return undefined;
@@ -47,7 +48,9 @@ export default class UserController extends AbstractController {
             avatar: body.avatar,
             isPrivate: body.isPrivate,
             description: body.description,
-            verified: false
+            verified: false,
+            subscribersCount: 0,
+            subscribedCount: 0
         });
 
         await DI.em.persistAndFlush(user);
@@ -75,11 +78,14 @@ export default class UserController extends AbstractController {
     }
 
     private async updateUser(ctx: Context) {
+        const user = await DI.userRepository.findOneWithJoins(ctx.params.username);
         const body = validate<TUpdate>(updateSchema, await this.json());
 
-        await DI.userRepository.update(ctx.params.username, body);
+        wrap(user).assign(body);
+        await DI.em.flush();
 
         ctx.status = 200;
+        ctx.body = format(user);
     }
 
     private async userSubscribe(ctx: Context) {
