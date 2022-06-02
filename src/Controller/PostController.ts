@@ -174,7 +174,7 @@ export default class PostController extends AbstractController {
 
         const post = await DI.postRepository.findOneOrFail(
             { id: ctx.params.id },
-            { populate: ['author'] }
+            { populate: ['author', 'comments', 'comments.replies'] }
         ).catch(() => this.createNotFound('post', ctx.params.id));
 
         if (post.author.username !== loggedUserUsername) throw new Forbidden();

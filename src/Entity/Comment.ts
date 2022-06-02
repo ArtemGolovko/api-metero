@@ -23,7 +23,7 @@ export default class Comment {
     @ManyToMany(() => User, 'commentsLiked', { owner: true })
     likes = new Collection<User>(this);
 
-    @OneToMany(() => Reply, reply => reply.comment)
+    @OneToMany(() => Reply, reply => reply.comment, { orphanRemoval: true })
     replies = new Collection<Reply>(this);
 
     @Property({ persist: false })

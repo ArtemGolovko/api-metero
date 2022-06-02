@@ -35,7 +35,7 @@ export default class Post {
     @ManyToMany(() => Hashtag, 'associatedPosts', { owner: true })
     hashtags = new Collection<Hashtag>(this);
 
-    @OneToMany(() => Comment, comment => comment.post)
+    @OneToMany(() => Comment, comment => comment.post, { orphanRemoval: true })
     comments = new Collection<Comment>(this);
 
     @Property({ persist: false })

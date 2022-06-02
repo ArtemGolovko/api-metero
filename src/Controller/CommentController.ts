@@ -130,7 +130,7 @@ export default class CommentController extends AbstractController {
         const loggedUserUsername = this.auth();
         const comment = await DI.commentRepository.findOneOrFail(
             { id: ctx.params.id },
-            { populate: ['author'] }
+            { populate: ['author', 'replies'] }
         ).catch(() => this.createNotFound('comment', ctx.params.id));
 
         if (comment.author.username !== loggedUserUsername) throw new Forbidden();
