@@ -14,11 +14,11 @@ export default class User {
     @Property({ type: types.string })
     name!: string
 
-    @Property({ type: types.string })
-    avatar!: string
+    @Property({ type: types.string, nullable: true })
+    avatar!: string|null
 
-    @Property({ type: types.string })
-    profileBanner!: string
+    @Property({ type: types.string, nullable: true })
+    profileBanner!: string|null
 
     @Property({ type: types.text })
     description!: string
